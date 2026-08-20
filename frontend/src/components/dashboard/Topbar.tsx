@@ -29,11 +29,6 @@ export function Topbar() {
           <BellIcon className="h-4 w-4" />
           <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-orange-500" />
         </button>
-
-        <button className="flex flex-1 items-center justify-center gap-2 rounded-full bg-gradient-to-t from-yellow-200 via-orange-400 to-orange-500 px-4 py-2.5 text-xs font-medium text-[#2c1306] shadow-[0_0_25px_-5px_rgba(249,115,22,0.6)] ring-1 ring-inset ring-white/40 transition-transform hover:scale-105 sm:flex-none">
-          <PlusIcon className="h-3.5 w-3.5 shrink-0" />
-          <span className="whitespace-nowrap">Nova avaliação</span>
-        </button>
       </div>
     </header>
   );

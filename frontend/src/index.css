@@ -1,0 +1,67 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", sans-serif;
+  --font-bricolage: "Bricolage Grotesque", sans-serif;
+}
+
+body {
+  background-color: #050505;
+  color: #fff;
+  font-family: var(--font-sans);
+}
+
+.font-bricolage {
+  font-family: var(--font-bricolage);
+}
+
+.stars {
+  background-image: radial-gradient(1px 1px at 20px 30px, #fff, rgba(0, 0, 0, 0)),
+    radial-gradient(1px 1px at 40px 70px, #ffffff, rgba(0, 0, 0, 0)),
+    radial-gradient(1px 1px at 50px 160px, #ffffff, rgba(0, 0, 0, 0)),
+    radial-gradient(1.5px 1.5px at 90px 40px, #ffffff, rgba(0, 0, 0, 0)),
+    radial-gradient(1px 1px at 130px 80px, #ffffff, rgba(0, 0, 0, 0));
+  background-size: 200px 200px;
+  opacity: 0.2;
+}
+
+.electric-card {
+  box-shadow:
+    0 0 30px rgba(249, 115, 22, 0.3),
+    inset 0 0 20px rgba(249, 115, 22, 0.1);
+}
+
+@keyframes fadeInUpBlur {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+    filter: blur(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+.animate-entry {
+  animation: fadeInUpBlur 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.delay-100 {
+  animation-delay: 0.1s;
+}
+.delay-150 {
+  animation-delay: 0.15s;
+}
+.delay-200 {
+  animation-delay: 0.2s;
+}
+.delay-300 {
+  animation-delay: 0.3s;
+}
+
+input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px #050505 inset !important;
+  -webkit-text-fill-color: #fff !important;
+}

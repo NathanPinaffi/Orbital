@@ -1,0 +1,176 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  TEACHER
+  STUDENT
+  ADMIN
+}
+
+enum BloomLevel {
+  REMEMBER
+  UNDERSTAND
+  APPLY
+  ANALYZE
+  EVALUATE
+  CREATE
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum QuestionType {
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+  SHORT_ANSWER
+  ESSAY
+}
+
+enum AssessmentStatus {
+  DRAFT
+  PUBLISHED
+  CLOSED
+}
+
+enum ProctoringEventType {
+  TAB_BLUR
+  INACTIVITY
+  COPY_PASTE
+  UNUSUAL_TIMING
+}
+
+model User {
+  id                String   @id @default(cuid())
+  name              String
+  email             String   @unique
+  passwordHash        String?
+  googleId            String?  @unique
+  googleRefreshToken  String?
+  role                Role     @default(TEACHER)
+  createdAt           DateTime @default(now())
+
+  classesTeaching   ClassSection[]     @relation("TeacherClasses")
+  enrollments       Enrollment[]
+  questionsCreated  Question[]
+  submissions       Submission[]
+}
+
+model ClassSection {
+  id                 String   @id @default(cuid())
+  name               String
+  googleClassroomId  String?  @unique
+  teacherId          String
+  teacher            User     @relation("TeacherClasses", fields: [teacherId], references: [id])
+  createdAt          DateTime @default(now())
+
+  enrollments        Enrollment[]
+  assessments        Assessment[]
+}
+
+model Enrollment {
+  id        String       @id @default(cuid())
+  studentId String
+  student   User         @relation(fields: [studentId], references: [id])
+  classId   String
+  class     ClassSection @relation(fields: [classId], references: [id])
+
+  @@unique([studentId, classId])
+}
+
+model Question {
+  id          String       @id @default(cuid())
+  authorId    String
+  author      User         @relation(fields: [authorId], references: [id])
+  subject     String
+  topic       String
+  content     String
+  type        QuestionType
+  difficulty  Difficulty
+  bloomLevel  BloomLevel
+  createdAt   DateTime     @default(now())
+
+  alternatives     Alternative[]
+  assessmentLinks  AssessmentQuestion[]
+  answers          Answer[]
+}
+
+model Alternative {
+  id         String   @id @default(cuid())
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  content    String
+  isCorrect  Boolean  @default(false)
+}
+
+model Assessment {
+  id          String            @id @default(cuid())
+  title       String
+  classId     String
+  class       ClassSection      @relation(fields: [classId], references: [id])
+  status      AssessmentStatus  @default(DRAFT)
+  dueAt       DateTime?
+  createdAt   DateTime          @default(now())
+
+  questions   AssessmentQuestion[]
+  submissions Submission[]
+}
+
+model AssessmentQuestion {
+  id           String     @id @default(cuid())
+  assessmentId String
+  assessment   Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  questionId   String
+  question     Question   @relation(fields: [questionId], references: [id])
+  order        Int
+  points       Float      @default(1)
+
+  @@unique([assessmentId, questionId])
+}
+
+model Submission {
+  id           String     @id @default(cuid())
+  assessmentId String
+  assessment   Assessment @relation(fields: [assessmentId], references: [id])
+  studentId    String
+  student      User       @relation(fields: [studentId], references: [id])
+  startedAt    DateTime   @default(now())
+  submittedAt  DateTime?
+  score        Float?
+
+  answers           Answer[]
+  proctoringEvents  ProctoringEvent[]
+
+  @@unique([assessmentId, studentId])
+}
+
+model Answer {
+  id             String     @id @default(cuid())
+  submissionId   String
+  submission     Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  questionId     String
+  question       Question   @relation(fields: [questionId], references: [id])
+  response       String
+  isCorrect      Boolean?
+  aiScore        Float?
+  aiFeedback     String?
+
+  @@unique([submissionId, questionId])
+}
+
+model ProctoringEvent {
+  id           String              @id @default(cuid())
+  submissionId String
+  submission   Submission          @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  type         ProctoringEventType
+  detail       String?
+  occurredAt   DateTime            @default(now())
+}

@@ -19,6 +19,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <Sidebar
         teacherName={me?.name ?? "Carregando…"}
         initials={me ? initials(me.name) : "—"}
+        avatarUrl={me?.avatarUrl ?? null}
         role={me?.role}
         open={mobileNavOpen}
         onClose={() => setMobileNavOpen(false)}

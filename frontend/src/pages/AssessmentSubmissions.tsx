@@ -5,6 +5,7 @@ import { Topbar } from "../components/dashboard/Topbar";
 import { GlassCard } from "../components/dashboard/GlassCard";
 import { ConfirmModal } from "../components/grading/ConfirmModal";
 import { useGsapEntrance } from "../hooks/useGsapEntrance";
+import { initials } from "../hooks/useMe";
 import {
   fetchAssessmentSubmissions,
   publishAllGrades,
@@ -139,9 +140,18 @@ export default function AssessmentSubmissions() {
                 onClick={() => s.submissionId && navigate(`/avaliacoes/${assessmentId}/submissions/${s.submissionId}`)}
                 className={`flex flex-wrap items-center justify-between gap-3 p-4 ${s.submissionId ? "cursor-pointer" : "opacity-60"}`}
               >
-                <div className="min-w-0">
-                  <p className="truncate text-sm text-white">{s.studentName}</p>
-                  <p className="text-xs text-neutral-500">Entregue em {formatDate(s.submittedAt)}</p>
+                <div className="flex min-w-0 items-center gap-3">
+                  {s.avatarUrl ? (
+                    <img src={s.avatarUrl} alt={s.studentName} className="h-8 w-8 shrink-0 rounded-full object-cover" />
+                  ) : (
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-orange-400 to-purple-700 text-[10px] font-medium text-white">
+                      {initials(s.studentName)}
+                    </div>
+                  )}
+                  <div className="min-w-0">
+                    <p className="truncate text-sm text-white">{s.studentName}</p>
+                    <p className="text-xs text-neutral-500">Entregue em {formatDate(s.submittedAt)}</p>
+                  </div>
                 </div>
                 <div className="flex items-center gap-3">
                   {s.hasUngraded && (

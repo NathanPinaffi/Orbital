@@ -6,6 +6,7 @@ import { GlassCard } from "../components/dashboard/GlassCard";
 import { ConfirmModal } from "../components/grading/ConfirmModal";
 import { EssayGrader } from "../components/grading/EssayGrader";
 import { useGsapEntrance } from "../hooks/useGsapEntrance";
+import { initials } from "../hooks/useMe";
 import {
   fetchSubmissionDetail,
   gradeAnswer,
@@ -92,9 +93,22 @@ export default function GradeSubmission() {
                 <Link to={`/avaliacoes/${assessmentId}/submissions`} className="text-xs text-neutral-500 hover:text-white">
                   ← Entregas
                 </Link>
-                <h1 className="font-bricolage text-xl font-light tracking-tight text-white sm:text-2xl">
-                  {data.submission.studentName}
-                </h1>
+                <div className="mt-1 flex items-center gap-3">
+                  {data.submission.avatarUrl ? (
+                    <img
+                      src={data.submission.avatarUrl}
+                      alt={data.submission.studentName}
+                      className="h-9 w-9 shrink-0 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-orange-400 to-purple-700 text-xs font-medium text-white">
+                      {initials(data.submission.studentName)}
+                    </div>
+                  )}
+                  <h1 className="font-bricolage text-xl font-light tracking-tight text-white sm:text-2xl">
+                    {data.submission.studentName}
+                  </h1>
+                </div>
                 <div className="mt-1 flex items-center gap-2">
                   <p className="font-bricolage text-lg font-light text-white">
                     Nota: {data.submission.score != null ? data.submission.score.toFixed(1) : "—"}

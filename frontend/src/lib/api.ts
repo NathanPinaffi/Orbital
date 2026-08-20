@@ -50,6 +50,7 @@ export interface Me {
   name: string;
   email: string;
   role: "TEACHER" | "STUDENT" | "ADMIN";
+  avatarUrl: string | null;
 }
 
 export function fetchMe(): Promise<Me> {
@@ -71,6 +72,15 @@ export function importClassroomCourse(
   googleCourseId: string,
 ): Promise<{ classSection: { id: string; name: string }; studentsImported: number }> {
   return authFetch(`/classroom/courses/${googleCourseId}/import`, { method: "POST" });
+}
+
+export interface ImportAllResult {
+  imported: Array<{ courseId: string; classSectionId: string; className: string; studentsImported: number }>;
+  skipped: Array<{ courseId: string; reason: string }>;
+}
+
+export function importAllClassroomCourses(): Promise<ImportAllResult> {
+  return authFetch("/classroom/courses/import-all", { method: "POST" });
 }
 
 export type QuestionType = "MULTIPLE_CHOICE" | "TRUE_FALSE" | "ESSAY";
@@ -148,6 +158,24 @@ export interface ClassSummary {
 
 export function fetchClasses(): Promise<ClassSummary[]> {
   return authFetch("/classes");
+}
+
+export interface ClassRankingEntry {
+  rank: number;
+  studentId: string;
+  studentName: string;
+  avatarUrl: string | null;
+  average: number | null;
+  submissionsCount: number;
+}
+
+export interface ClassRanking {
+  className: string;
+  ranking: ClassRankingEntry[];
+}
+
+export function fetchClassRanking(classId: string): Promise<ClassRanking> {
+  return authFetch(`/classes/${classId}/ranking`);
 }
 
 export type AssessmentStatus = "DRAFT" | "PUBLISHED" | "CLOSED";
@@ -246,6 +274,7 @@ export interface SubmissionListItem {
   submissionId: string | null;
   studentId: string;
   studentName: string;
+  avatarUrl: string | null;
   status: SubmissionStatus;
   submittedAt: string | null;
   score: number | null;
@@ -291,6 +320,7 @@ export interface SubmissionDetail {
     id: string;
     studentId: string;
     studentName: string;
+    avatarUrl: string | null;
     submittedAt: string | null;
     score: number | null;
     gradePublishedAt: string | null;

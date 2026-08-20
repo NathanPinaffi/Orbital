@@ -1,8 +1,9 @@
 import { Router } from "express";
 import { google } from "googleapis";
-import { createOAuthClient, getAuthUrl } from "../lib/google.js";
+import { createOAuthClient, getAuthUrl, classroomClient } from "../lib/google.js";
 import { prisma } from "../lib/prisma.js";
 import { signUserToken } from "../lib/jwt.js";
+import { importAllCourses } from "../lib/importClassroom.js";
 
 export const googleAuthRouter = Router();
 
@@ -46,15 +47,24 @@ googleAuthRouter.get("/google/callback", async (req, res) => {
         name: profile.name ?? profile.email,
         email: profile.email,
         googleId: profile.id,
+        ...(profile.picture ? { avatarUrl: profile.picture } : {}),
         ...(tokens.refresh_token ? { googleRefreshToken: tokens.refresh_token } : {}),
       },
       create: {
         googleId: profile.id,
         name: profile.name ?? profile.email,
         email: profile.email,
+        avatarUrl: profile.picture ?? undefined,
         googleRefreshToken: tokens.refresh_token ?? undefined,
       },
     });
+
+    const refreshToken = tokens.refresh_token ?? user.googleRefreshToken;
+    if (user.role === "TEACHER" && refreshToken) {
+      importAllCourses(classroomClient(refreshToken), user.id).catch((err) => {
+        console.error("Falha ao pré-importar turmas após login:", err);
+      });
+    }
 
     const jwtToken = signUserToken(user);
     const state = typeof req.query.state === "string" ? req.query.state : undefined;

@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Classrooms from "./pages/Classrooms";
+import ClassRanking from "./pages/ClassRanking";
 import QuestionBank from "./pages/QuestionBank";
 import Assessments from "./pages/Assessments";
 import AssessmentSubmissions from "./pages/AssessmentSubmissions";
@@ -38,6 +39,14 @@ export default function App() {
           element={
             <ProtectedRoute allow={["TEACHER", "ADMIN"]}>
               <Classrooms />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/turmas/:classId/ranking"
+          element={
+            <ProtectedRoute allow={["TEACHER", "ADMIN"]}>
+              <ClassRanking />
             </ProtectedRoute>
           }
         />

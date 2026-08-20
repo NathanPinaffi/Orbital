@@ -42,12 +42,14 @@ const ROLE_LABEL: Record<string, string> = {
 export function Sidebar({
   teacherName,
   initials,
+  avatarUrl,
   role,
   open = false,
   onClose,
 }: {
   teacherName: string;
   initials: string;
+  avatarUrl?: string | null;
   role?: string;
   open?: boolean;
   onClose?: () => void;
@@ -130,9 +132,13 @@ export function Sidebar({
         </nav>
 
         <div className="flex items-center gap-3 rounded-xl border border-white/5 bg-white/[0.03] p-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-orange-400 to-purple-700 text-xs font-medium text-white">
-            {initials}
-          </div>
+          {avatarUrl ? (
+            <img src={avatarUrl} alt={teacherName} className="h-9 w-9 shrink-0 rounded-full object-cover" />
+          ) : (
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-orange-400 to-purple-700 text-xs font-medium text-white">
+              {initials}
+            </div>
+          )}
           <div className="min-w-0 flex-1">
             <p className="truncate text-xs text-white">{teacherName}</p>
             <p className="text-[11px] text-neutral-500">{role ? ROLE_LABEL[role] ?? role : "—"}</p>

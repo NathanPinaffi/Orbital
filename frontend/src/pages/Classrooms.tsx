@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { AppShell } from "../components/layout/AppShell";
 import { GlassCard } from "../components/dashboard/GlassCard";
 import { Button } from "../components/ui/Button";
@@ -6,37 +7,56 @@ import { GoogleIcon } from "../components/ui/icons";
 import { CheckCircleIcon, UsersIcon } from "../components/ui/dashboardIcons";
 import { useGsapEntrance } from "../hooks/useGsapEntrance";
 import { useClassroomCourses } from "../hooks/useClassroomCourses";
-import { importClassroomCourse, loginWithGoogle, type ClassroomCourse } from "../lib/api";
+import { importAllClassroomCourses, loginWithGoogle, type ClassroomCourse } from "../lib/api";
 
-type ImportState = "idle" | "importing" | "done" | "error";
+type SyncState = "idle" | "syncing" | "done" | "error";
 
 export default function Classrooms() {
   const containerRef = useGsapEntrance<HTMLDivElement>();
   const { status, courses } = useClassroomCourses();
-  const [importStates, setImportStates] = useState<Record<string, { state: ImportState; students?: number }>>({});
+  const [syncState, setSyncState] = useState<SyncState>("idle");
+  const [classSectionByCourseId, setClassSectionByCourseId] = useState<Record<string, { id: string; students: number }>>({});
 
-  async function handleImport(course: ClassroomCourse) {
-    setImportStates((prev) => ({ ...prev, [course.id]: { state: "importing" } }));
+  async function runSync() {
+    setSyncState("syncing");
     try {
-      const result = await importClassroomCourse(course.id);
-      setImportStates((prev) => ({
-        ...prev,
-        [course.id]: { state: "done", students: result.studentsImported },
-      }));
+      const result = await importAllClassroomCourses();
+      const map: Record<string, { id: string; students: number }> = {};
+      for (const item of result.imported) {
+        map[item.courseId] = { id: item.classSectionId, students: item.studentsImported };
+      }
+      setClassSectionByCourseId(map);
+      setSyncState("done");
     } catch {
-      setImportStates((prev) => ({ ...prev, [course.id]: { state: "error" } }));
+      setSyncState("error");
     }
   }
+
+  useEffect(() => {
+    if (status === "ready") runSync();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status]);
 
   return (
     <AppShell>
       <div ref={containerRef}>
-        <header data-animate className="mb-8">
-          <h1 className="font-bricolage text-2xl font-light tracking-tight text-white sm:text-3xl">
-            Turmas
-          </h1>
-          <br />
-          <p className="text-sm text-neutral-500">Importe suas turmas diretamente do Google Sala de Aula.</p>
+        <header data-animate className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="font-bricolage text-2xl font-light tracking-tight text-white sm:text-3xl">
+              Turmas
+            </h1>
+            <br />
+            <p className="text-sm text-neutral-500">Suas turmas são importadas automaticamente do Google Sala de Aula.</p>
+          </div>
+          {status === "ready" && (
+            <button
+              onClick={runSync}
+              disabled={syncState === "syncing"}
+              className="shrink-0 self-start rounded-full bg-white/[0.06] px-4 py-2 text-xs font-medium text-white ring-1 ring-white/10 transition hover:bg-white/[0.1] disabled:cursor-not-allowed disabled:opacity-50 sm:self-auto"
+            >
+              {syncState === "syncing" ? "Sincronizando…" : "Sincronizar novamente"}
+            </button>
+          )}
         </header>
 
         {status === "loading" && (
@@ -75,17 +95,24 @@ export default function Classrooms() {
           </GlassCard>
         )}
 
-        {status === "ready" && courses.length === 0 && (
+        {status === "ready" && syncState === "syncing" && Object.keys(classSectionByCourseId).length === 0 && (
+          <div data-animate className="space-y-3">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="h-16 animate-pulse rounded-2xl bg-white/[0.03]" />
+            ))}
+          </div>
+        )}
+
+        {status === "ready" && courses.length === 0 && syncState !== "syncing" && (
           <GlassCard data-animate className="max-w-lg p-6 text-sm text-neutral-400">
             Nenhuma turma ativa encontrada no seu Google Sala de Aula.
           </GlassCard>
         )}
 
-        {status === "ready" && courses.length > 0 && (
+        {status === "ready" && courses.length > 0 && (syncState === "done" || syncState === "error") && (
           <div className="space-y-3">
-            {courses.map((course) => {
-              const importState = importStates[course.id]?.state ?? "idle";
-              const students = importStates[course.id]?.students;
+            {courses.map((course: ClassroomCourse) => {
+              const imported = classSectionByCourseId[course.id];
               return (
                 <GlassCard
                   key={course.id}
@@ -104,23 +131,23 @@ export default function Classrooms() {
                     </div>
                   </div>
 
-                  {importState === "done" ? (
-                    <span className="flex shrink-0 items-center gap-1.5 text-xs text-emerald-400">
-                      <CheckCircleIcon className="h-4 w-4" />
-                      Importada · {students} alunos
-                    </span>
+                  {imported ? (
+                    <div className="flex shrink-0 items-center gap-3">
+                      <span className="flex items-center gap-1.5 text-xs text-emerald-400">
+                        <CheckCircleIcon className="h-4 w-4" />
+                        Importada · {imported.students} alunos
+                      </span>
+                      <Link
+                        to={`/turmas/${imported.id}/ranking`}
+                        className="rounded-full bg-white/[0.06] px-3 py-1.5 text-xs font-medium text-white ring-1 ring-white/10 transition hover:bg-white/[0.1]"
+                      >
+                        Ver ranking
+                      </Link>
+                    </div>
                   ) : (
-                    <button
-                      onClick={() => handleImport(course)}
-                      disabled={importState === "importing"}
-                      className="shrink-0 self-start rounded-full bg-white px-4 py-2 text-xs font-medium text-black transition-colors hover:bg-neutral-200 disabled:opacity-50 sm:self-auto"
-                    >
-                      {importState === "importing"
-                        ? "Importando…"
-                        : importState === "error"
-                          ? "Tentar novamente"
-                          : "Importar"}
-                    </button>
+                    <span className="shrink-0 text-xs text-neutral-500">
+                      {syncState === "error" ? "Falha ao sincronizar" : "Não importada"}
+                    </span>
                   )}
                 </GlassCard>
               );

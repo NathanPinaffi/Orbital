@@ -55,6 +55,7 @@ model User {
   passwordHash        String?
   googleId            String?  @unique
   googleRefreshToken  String?
+  avatarUrl           String?
   role                Role     @default(TEACHER)
   createdAt           DateTime @default(now())
 

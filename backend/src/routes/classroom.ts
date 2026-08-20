@@ -1,26 +1,23 @@
 import { Router } from "express";
-import type { classroom_v1 } from "googleapis";
 import { classroomForRequest } from "../lib/google.js";
 import { prisma } from "../lib/prisma.js";
 import { requireAuth, requireRole, type AuthedRequest } from "../lib/authMiddleware.js";
 import { distributeAssessment } from "../lib/distributeAssessment.js";
+import { importCourseRoster, importAllCourses, listAllActiveCourses } from "../lib/importClassroom.js";
+import { cached } from "../lib/redis.js";
 
 export const classroomRouter = Router();
 classroomRouter.use(requireAuth, requireRole("TEACHER", "ADMIN"));
 
-/** Lista as turmas ativas do Google Sala de Aula em que o usuário é professor. */
+/** Lista as turmas ativas do Google Sala de Aula em que o usuário é professor (cacheada por 5 min). */
 classroomRouter.get("/courses", async (req: AuthedRequest, res, next) => {
   try {
     const { classroom } = await classroomForRequest(req);
-    const { data } = await classroom.courses.list({ teacherId: "me", courseStates: ["ACTIVE"] });
-    res.json(
-      (data.courses ?? []).map((c) => ({
-        id: c.id,
-        name: c.name,
-        section: c.section,
-        room: c.room,
-      })),
-    );
+    const courses = await cached(`classroom:courses:${req.userId}`, 300, async () => {
+      const list = await listAllActiveCourses(classroom);
+      return list.map((c) => ({ id: c.id, name: c.name, section: c.section, room: c.room }));
+    });
+    res.json(courses);
   } catch (err) {
     next(err);
   }
@@ -30,48 +27,19 @@ classroomRouter.get("/courses", async (req: AuthedRequest, res, next) => {
 classroomRouter.post("/courses/:googleCourseId/import", async (req: AuthedRequest, res, next) => {
   try {
     const { user, classroom } = await classroomForRequest(req);
-    const { googleCourseId } = req.params;
+    const result = await importCourseRoster(classroom, user.id, req.params.googleCourseId);
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+});
 
-    const { data: course } = await classroom.courses.get({ id: googleCourseId });
-    const classSection = await prisma.classSection.upsert({
-      where: { googleClassroomId: googleCourseId },
-      update: { name: course.name ?? "Turma sem nome" },
-      create: {
-        name: course.name ?? "Turma sem nome",
-        googleClassroomId: googleCourseId,
-        teacherId: user.id,
-      },
-    });
-
-    const students: classroom_v1.Schema$Student[] = [];
-    let pageToken: string | undefined;
-    do {
-      const { data: rosterPage } = await classroom.courses.students.list({
-        courseId: googleCourseId,
-        pageToken,
-      });
-      students.push(...(rosterPage.students ?? []));
-      pageToken = rosterPage.nextPageToken ?? undefined;
-    } while (pageToken);
-
-    for (const s of students) {
-      const email = s.profile?.emailAddress;
-      if (!email) continue;
-
-      const student = await prisma.user.upsert({
-        where: { email },
-        update: {},
-        create: { name: s.profile?.name?.fullName ?? email, email, role: "STUDENT" },
-      });
-
-      await prisma.enrollment.upsert({
-        where: { studentId_classId: { studentId: student.id, classId: classSection.id } },
-        update: {},
-        create: { studentId: student.id, classId: classSection.id },
-      });
-    }
-
-    res.json({ classSection, studentsImported: students.length });
+/** Importa todas as turmas ativas do professor de uma vez (usado no auto-sync). */
+classroomRouter.post("/courses/import-all", async (req: AuthedRequest, res, next) => {
+  try {
+    const { user, classroom } = await classroomForRequest(req);
+    const result = await importAllCourses(classroom, user.id);
+    res.json(result);
   } catch (err) {
     next(err);
   }

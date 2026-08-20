@@ -13,15 +13,23 @@ import {
   XIcon,
 } from "../ui/dashboardIcons";
 
-const navItems: Array<{
+type NavItem = {
   label: string;
   icon: (p: { className?: string }) => ReactNode;
   to?: string;
-}> = [
+};
+
+const TEACHER_ITEMS: NavItem[] = [
   { label: "Visão geral", icon: LayoutGridIcon, to: "/dashboard" },
   { label: "Avaliações", icon: FileTextIcon, to: "/avaliacoes" },
   { label: "Banco de questões", icon: BookOpenIcon, to: "/banco-de-questoes" },
   { label: "Turmas", icon: UsersIcon, to: "/turmas" },
+  { label: "Configurações", icon: SettingsIcon },
+];
+
+const STUDENT_ITEMS: NavItem[] = [
+  { label: "Visão geral", icon: LayoutGridIcon, to: "/dashboard" },
+  { label: "Minhas turmas", icon: UsersIcon, to: "/minhas-turmas" },
   { label: "Configurações", icon: SettingsIcon },
 ];
 
@@ -45,6 +53,7 @@ export function Sidebar({
   onClose?: () => void;
 }) {
   const { pathname } = useLocation();
+  const navItems = role === "STUDENT" ? STUDENT_ITEMS : TEACHER_ITEMS;
 
   function onEnter(target: EventTarget) {
     gsap.to(target as Element, { x: 4, duration: 0.25, ease: "power2.out" });

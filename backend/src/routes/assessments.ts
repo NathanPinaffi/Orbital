@@ -1,12 +1,14 @@
 import { Router } from "express";
 import { z } from "zod";
+import type { Prisma } from "@prisma/client";
 import { prisma } from "../lib/prisma.js";
-import { requireAuth, type AuthedRequest } from "../lib/authMiddleware.js";
+import { requireAuth, requireRole, type AuthedRequest } from "../lib/authMiddleware.js";
 import { classroomForRequest } from "../lib/google.js";
 import { distributeAssessment } from "../lib/distributeAssessment.js";
+import { publishGradeForSubmission, publishGradesForAssessment } from "../lib/publishGrades.js";
 
 export const assessmentsRouter = Router();
-assessmentsRouter.use(requireAuth);
+assessmentsRouter.use(requireAuth, requireRole("TEACHER", "ADMIN"));
 
 const createSchema = z.object({
   title: z.string().min(1),
@@ -89,6 +91,281 @@ assessmentsRouter.post("/", async (req: AuthedRequest, res, next) => {
     }
 
     res.status(201).json(created);
+  } catch (err) {
+    next(err);
+  }
+});
+
+/** Carrega a avaliação garantindo que pertence a uma turma do professor autenticado. */
+async function loadOwnedAssessment(assessmentId: string, teacherId: string) {
+  const assessment = await prisma.assessment.findUnique({
+    where: { id: assessmentId },
+    include: { class: true },
+  });
+  if (!assessment || assessment.class.teacherId !== teacherId) {
+    const err = new Error("Avaliação não encontrada");
+    (err as { status?: number }).status = 404;
+    throw err;
+  }
+  return assessment;
+}
+
+/** Lista as entregas da avaliação (matriculados sem entrega aparecem como not_started). */
+assessmentsRouter.get("/:assessmentId/submissions", async (req: AuthedRequest, res, next) => {
+  try {
+    const assessment = await loadOwnedAssessment(req.params.assessmentId, req.userId!);
+
+    const [enrollments, submissions] = await Promise.all([
+      prisma.enrollment.findMany({ where: { classId: assessment.classId }, include: { student: true } }),
+      prisma.submission.findMany({
+        where: { assessmentId: assessment.id },
+        include: { answers: { include: { question: true } } },
+      }),
+    ]);
+
+    const submissionByStudentId = new Map(submissions.map((s) => [s.studentId, s]));
+
+    const rows = enrollments.map(({ student }) => {
+      const submission = submissionByStudentId.get(student.id);
+      if (!submission) {
+        return {
+          submissionId: null,
+          studentId: student.id,
+          studentName: student.name,
+          status: "not_started" as const,
+          submittedAt: null,
+          score: null,
+          hasUngraded: false,
+          gradePublishedAt: null,
+        };
+      }
+      const hasUngraded = submission.answers.some((a) => a.question.type === "ESSAY" && !a.gradedAt);
+      return {
+        submissionId: submission.id,
+        studentId: student.id,
+        studentName: student.name,
+        status: submission.submittedAt ? ("submitted" as const) : ("in_progress" as const),
+        submittedAt: submission.submittedAt,
+        score: submission.score,
+        hasUngraded,
+        gradePublishedAt: submission.gradePublishedAt,
+      };
+    });
+
+    res.json({
+      assessment: { id: assessment.id, title: assessment.title, status: assessment.status, googleCourseWorkId: assessment.googleCourseWorkId },
+      submissions: rows,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/** Carrega os dados de uma entrega para o professor visualizar/corrigir. */
+async function loadOwnedSubmission(assessmentId: string, submissionId: string, teacherId: string) {
+  const assessment = await loadOwnedAssessment(assessmentId, teacherId);
+  const submission = await prisma.submission.findUnique({
+    where: { id: submissionId },
+    include: { student: true, answers: true },
+  });
+  if (!submission || submission.assessmentId !== assessment.id) {
+    const err = new Error("Entrega não encontrada");
+    (err as { status?: number }).status = 404;
+    throw err;
+  }
+  return { assessment, submission };
+}
+
+/** Detalhe de uma entrega: questões na ordem, resposta do aluno e estado de correção. */
+assessmentsRouter.get("/:assessmentId/submissions/:submissionId", async (req: AuthedRequest, res, next) => {
+  try {
+    const { assessment, submission } = await loadOwnedSubmission(
+      req.params.assessmentId,
+      req.params.submissionId,
+      req.userId!,
+    );
+
+    const assessmentQuestions = await prisma.assessmentQuestion.findMany({
+      where: { assessmentId: assessment.id },
+      include: { question: { include: { alternatives: true } } },
+      orderBy: { order: "asc" },
+    });
+
+    const answerByQuestionId = new Map(submission.answers.map((a) => [a.questionId, a]));
+
+    const questions = assessmentQuestions.map((aq) => {
+      const answer = answerByQuestionId.get(aq.questionId);
+      return {
+        questionId: aq.question.id,
+        content: aq.question.content,
+        type: aq.question.type,
+        maxPoints: aq.points,
+        alternatives: aq.question.alternatives.map((alt) => ({ id: alt.id, content: alt.content, isCorrect: alt.isCorrect })),
+        answer: answer
+          ? {
+              id: answer.id,
+              response: answer.response,
+              isCorrect: answer.isCorrect,
+              points: answer.points,
+              teacherComment: answer.teacherComment,
+              gradedAt: answer.gradedAt,
+            }
+          : null,
+      };
+    });
+
+    res.json({
+      submission: {
+        id: submission.id,
+        studentId: submission.studentId,
+        studentName: submission.student.name,
+        submittedAt: submission.submittedAt,
+        score: submission.score,
+        gradePublishedAt: submission.gradePublishedAt,
+      },
+      questions,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+const gradeAnswerSchema = z.object({
+  points: z.number().min(0),
+  teacherComment: z.string().optional(),
+});
+
+/** Recalcula a nota da submission a partir das respostas já pontuadas (objetivas + dissertativas corrigidas). */
+async function recomputeSubmissionScore(tx: Prisma.TransactionClient, assessmentId: string, submissionId: string) {
+  const [assessmentQuestions, answers] = await Promise.all([
+    tx.assessmentQuestion.findMany({ where: { assessmentId } }),
+    tx.answer.findMany({ where: { submissionId } }),
+  ]);
+
+  const maxPointsByQuestionId = new Map(assessmentQuestions.map((aq) => [aq.questionId, aq.points]));
+
+  let earned = 0;
+  let total = 0;
+  for (const answer of answers) {
+    const maxPoints = maxPointsByQuestionId.get(answer.questionId) ?? 0;
+    const isGraded = answer.isCorrect !== null || answer.gradedAt !== null;
+    if (!isGraded) continue;
+    total += maxPoints;
+    earned += answer.points ?? 0;
+  }
+
+  const score = total > 0 ? (earned / total) * 10 : null;
+  await tx.submission.update({ where: { id: submissionId }, data: { score } });
+  return score;
+}
+
+/** Atribui pontos e comentário a uma questão dissertativa e recalcula a nota da entrega. */
+assessmentsRouter.patch(
+  "/:assessmentId/submissions/:submissionId/answers/:answerId",
+  async (req: AuthedRequest, res, next) => {
+    try {
+      const parsed = gradeAnswerSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: parsed.error.flatten() });
+      }
+
+      const { assessment, submission } = await loadOwnedSubmission(
+        req.params.assessmentId,
+        req.params.submissionId,
+        req.userId!,
+      );
+      if (!submission.submittedAt) {
+        return res.status(409).json({ error: "A prova ainda não foi entregue" });
+      }
+
+      const answer = await prisma.answer.findUnique({
+        where: { id: req.params.answerId },
+        include: { question: true },
+      });
+      if (!answer || answer.submissionId !== submission.id) {
+        return res.status(404).json({ error: "Resposta não encontrada" });
+      }
+      if (answer.question.type !== "ESSAY") {
+        return res.status(400).json({ error: "Apenas questões dissertativas podem ser corrigidas manualmente" });
+      }
+
+      const aq = await prisma.assessmentQuestion.findUnique({
+        where: { assessmentId_questionId: { assessmentId: assessment.id, questionId: answer.questionId } },
+      });
+      const maxPoints = aq?.points ?? 0;
+      if (parsed.data.points > maxPoints) {
+        return res.status(400).json({ error: `A pontuação máxima desta questão é ${maxPoints}` });
+      }
+
+      const [updatedAnswer, score] = await prisma.$transaction(async (tx) => {
+        const updated = await tx.answer.update({
+          where: { id: answer.id },
+          data: { points: parsed.data.points, teacherComment: parsed.data.teacherComment, gradedAt: new Date() },
+        });
+        const newScore = await recomputeSubmissionScore(tx, assessment.id, submission.id);
+        return [updated, newScore];
+      });
+
+      res.json({ answer: updatedAnswer, submission: { id: submission.id, score } });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+/** Anula (exclui permanentemente) a entrega de um aluno específico. */
+assessmentsRouter.post("/:assessmentId/submissions/:submissionId/void", async (req: AuthedRequest, res, next) => {
+  try {
+    const { submission } = await loadOwnedSubmission(req.params.assessmentId, req.params.submissionId, req.userId!);
+    await prisma.submission.delete({ where: { id: submission.id } });
+    res.status(204).send();
+  } catch (err) {
+    next(err);
+  }
+});
+
+/** Anula (exclui permanentemente) todas as entregas da avaliação. */
+assessmentsRouter.post("/:assessmentId/void-all", async (req: AuthedRequest, res, next) => {
+  try {
+    const assessment = await loadOwnedAssessment(req.params.assessmentId, req.userId!);
+    const { count } = await prisma.submission.deleteMany({ where: { assessmentId: assessment.id } });
+    res.json({ deletedCount: count });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/** Publica a nota de um aluno específico no Google Sala de Aula. */
+assessmentsRouter.post(
+  "/:assessmentId/submissions/:submissionId/publish-grade",
+  async (req: AuthedRequest, res, next) => {
+    try {
+      const { assessment, submission } = await loadOwnedSubmission(
+        req.params.assessmentId,
+        req.params.submissionId,
+        req.userId!,
+      );
+      const { classroom } = await classroomForRequest(req);
+      const updated = await publishGradeForSubmission(classroom, assessment, submission);
+      res.json({ publishedAt: updated.gradePublishedAt });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+/** Publica a nota de todos os alunos já corrigidos da avaliação no Google Sala de Aula. */
+assessmentsRouter.post("/:assessmentId/publish-grades", async (req: AuthedRequest, res, next) => {
+  try {
+    const assessment = await loadOwnedAssessment(req.params.assessmentId, req.userId!);
+    const submissions = await prisma.submission.findMany({
+      where: { assessmentId: assessment.id, submittedAt: { not: null } },
+      include: { student: true },
+    });
+
+    const { classroom } = await classroomForRequest(req);
+    const result = await publishGradesForAssessment(classroom, assessment, submissions);
+    res.json(result);
   } catch (err) {
     next(err);
   }

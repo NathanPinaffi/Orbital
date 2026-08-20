@@ -22,3 +22,12 @@ export function requireAuth(req: AuthedRequest, res: Response, next: NextFunctio
     res.status(401).json({ error: "Token inválido ou expirado" });
   }
 }
+
+export function requireRole(...roles: string[]) {
+  return (req: AuthedRequest, res: Response, next: NextFunction) => {
+    if (!req.role || !roles.includes(req.role)) {
+      return res.status(403).json({ error: "Você não tem permissão para acessar este recurso" });
+    }
+    next();
+  };
+}

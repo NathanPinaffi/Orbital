@@ -1,11 +1,12 @@
 import { Router } from "express";
+import type { classroom_v1 } from "googleapis";
 import { classroomForRequest } from "../lib/google.js";
 import { prisma } from "../lib/prisma.js";
-import { requireAuth, type AuthedRequest } from "../lib/authMiddleware.js";
+import { requireAuth, requireRole, type AuthedRequest } from "../lib/authMiddleware.js";
 import { distributeAssessment } from "../lib/distributeAssessment.js";
 
 export const classroomRouter = Router();
-classroomRouter.use(requireAuth);
+classroomRouter.use(requireAuth, requireRole("TEACHER", "ADMIN"));
 
 /** Lista as turmas ativas do Google Sala de Aula em que o usuário é professor. */
 classroomRouter.get("/courses", async (req: AuthedRequest, res, next) => {
@@ -42,8 +43,16 @@ classroomRouter.post("/courses/:googleCourseId/import", async (req: AuthedReques
       },
     });
 
-    const { data: rosterPage } = await classroom.courses.students.list({ courseId: googleCourseId });
-    const students = rosterPage.students ?? [];
+    const students: classroom_v1.Schema$Student[] = [];
+    let pageToken: string | undefined;
+    do {
+      const { data: rosterPage } = await classroom.courses.students.list({
+        courseId: googleCourseId,
+        pageToken,
+      });
+      students.push(...(rosterPage.students ?? []));
+      pageToken = rosterPage.nextPageToken ?? undefined;
+    } while (pageToken);
 
     for (const s of students) {
       const email = s.profile?.emailAddress;

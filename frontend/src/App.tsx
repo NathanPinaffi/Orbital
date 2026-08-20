@@ -4,6 +4,9 @@ import Dashboard from "./pages/Dashboard";
 import Classrooms from "./pages/Classrooms";
 import QuestionBank from "./pages/QuestionBank";
 import Assessments from "./pages/Assessments";
+import AssessmentSubmissions from "./pages/AssessmentSubmissions";
+import GradeSubmission from "./pages/GradeSubmission";
+import MyClasses from "./pages/MyClasses";
 import Exam from "./pages/Exam";
 import AuthCallback from "./pages/AuthCallback";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -14,11 +17,26 @@ export default function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/minhas-turmas"
+          element={
+            <ProtectedRoute allow={["STUDENT"]}>
+              <MyClasses />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/turmas"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allow={["TEACHER", "ADMIN"]}>
               <Classrooms />
             </ProtectedRoute>
           }
@@ -26,7 +44,7 @@ export default function App() {
         <Route
           path="/banco-de-questoes"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allow={["TEACHER", "ADMIN"]}>
               <QuestionBank />
             </ProtectedRoute>
           }
@@ -34,8 +52,24 @@ export default function App() {
         <Route
           path="/avaliacoes"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allow={["TEACHER", "ADMIN"]}>
               <Assessments />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/avaliacoes/:assessmentId/submissions"
+          element={
+            <ProtectedRoute allow={["TEACHER", "ADMIN"]}>
+              <AssessmentSubmissions />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/avaliacoes/:assessmentId/submissions/:submissionId"
+          element={
+            <ProtectedRoute allow={["TEACHER", "ADMIN"]}>
+              <GradeSubmission />
             </ProtectedRoute>
           }
         />

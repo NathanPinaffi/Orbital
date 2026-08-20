@@ -1,10 +1,10 @@
 import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../lib/prisma.js";
-import { requireAuth, type AuthedRequest } from "../lib/authMiddleware.js";
+import { requireAuth, requireRole, type AuthedRequest } from "../lib/authMiddleware.js";
 
 export const questionsRouter = Router();
-questionsRouter.use(requireAuth);
+questionsRouter.use(requireAuth, requireRole("TEACHER", "ADMIN"));
 
 const difficultySchema = z.enum(["EASY", "MEDIUM", "HARD"]);
 const bloomLevelSchema = z.enum(["REMEMBER", "UNDERSTAND", "APPLY", "ANALYZE", "EVALUATE", "CREATE"]);

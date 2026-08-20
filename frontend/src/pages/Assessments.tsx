@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { AppShell } from "../components/layout/AppShell";
 import { GlassCard } from "../components/dashboard/GlassCard";
 import { PlusIcon } from "../components/ui/dashboardIcons";
@@ -20,6 +21,7 @@ const STATUS_STYLE: Record<AssessmentStatus, string> = {
 
 export default function Assessments() {
   const containerRef = useGsapEntrance<HTMLDivElement>();
+  const navigate = useNavigate();
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const [assessments, setAssessments] = useState<AssessmentSummary[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
@@ -84,7 +86,12 @@ export default function Assessments() {
         {status === "ready" && assessments.length > 0 && (
           <div className="space-y-3">
             {assessments.map((a) => (
-              <GlassCard key={a.id} data-animate className="p-5">
+              <GlassCard
+                key={a.id}
+                data-animate
+                onClick={() => navigate(`/avaliacoes/${a.id}/submissions`)}
+                className="cursor-pointer p-5"
+              >
                 <div className="mb-1 flex flex-wrap items-center gap-2">
                   <p className="truncate text-sm text-white">{a.title}</p>
                   <span className={`shrink-0 rounded-md px-1.5 py-0.5 text-[10px] uppercase ring-1 ${STATUS_STYLE[a.status]}`}>

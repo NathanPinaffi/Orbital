@@ -10,12 +10,19 @@ examsRouter.use(requireAuth);
 async function loadAssessmentForStudent(assessmentId: string, studentId: string) {
   const assessment = await prisma.assessment.findUnique({
     where: { id: assessmentId },
-    include: { questions: { include: { question: { include: { alternatives: true } } } } },
+    include: {
+      class: true,
+      questions: { include: { question: { include: { alternatives: true } } } },
+    },
   });
   if (!assessment) {
     const err = new Error("Avaliação não encontrada");
     (err as { status?: number }).status = 404;
     throw err;
+  }
+
+  if (assessment.class.teacherId === studentId) {
+    return assessment;
   }
 
   const enrollment = await prisma.enrollment.findUnique({
@@ -128,7 +135,7 @@ examsRouter.post("/:assessmentId/submit", async (req: AuthedRequest, res, next) 
       if (!aq) return null;
 
       if (aq.question.type === "ESSAY") {
-        return { questionId: a.questionId, response: a.response, isCorrect: null };
+        return { questionId: a.questionId, response: a.response, isCorrect: null, points: null };
       }
 
       totalObjectivePoints += aq.points;
@@ -136,7 +143,7 @@ examsRouter.post("/:assessmentId/submit", async (req: AuthedRequest, res, next) 
       const isCorrect = chosen?.isCorrect ?? false;
       if (isCorrect) earnedPoints += aq.points;
 
-      return { questionId: a.questionId, response: a.response, isCorrect };
+      return { questionId: a.questionId, response: a.response, isCorrect, points: isCorrect ? aq.points : 0 };
     });
 
     const validAnswers = answerRows.filter((a): a is NonNullable<typeof a> => a !== null);
@@ -150,6 +157,7 @@ examsRouter.post("/:assessmentId/submit", async (req: AuthedRequest, res, next) 
           questionId: a.questionId,
           response: a.response,
           isCorrect: a.isCorrect,
+          points: a.points,
         })),
       });
       await tx.submission.update({

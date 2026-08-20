@@ -215,3 +215,119 @@ export function submitExam(
 ): Promise<{ status: "submitted"; score: number | null }> {
   return authFetch(`/exams/${assessmentId}/submit`, { method: "POST", body: JSON.stringify({ answers }) });
 }
+
+export interface StudentDashboardClass {
+  id: string;
+  name: string;
+  teacherName: string;
+}
+
+export interface StudentDashboardSubmission {
+  id: string;
+  assessmentId: string;
+  assessmentTitle: string;
+  className: string;
+  submittedAt: string;
+  score: number | null;
+}
+
+export interface StudentDashboard {
+  classes: StudentDashboardClass[];
+  submissions: StudentDashboardSubmission[];
+}
+
+export function fetchStudentDashboard(): Promise<StudentDashboard> {
+  return authFetch("/dashboard/student");
+}
+
+export type SubmissionStatus = "not_started" | "in_progress" | "submitted";
+
+export interface SubmissionListItem {
+  submissionId: string | null;
+  studentId: string;
+  studentName: string;
+  status: SubmissionStatus;
+  submittedAt: string | null;
+  score: number | null;
+  hasUngraded: boolean;
+  gradePublishedAt: string | null;
+}
+
+export interface AssessmentSubmissionsResponse {
+  assessment: { id: string; title: string; status: AssessmentStatus; googleCourseWorkId: string | null };
+  submissions: SubmissionListItem[];
+}
+
+export function fetchAssessmentSubmissions(assessmentId: string): Promise<AssessmentSubmissionsResponse> {
+  return authFetch(`/assessments/${assessmentId}/submissions`);
+}
+
+export interface GradingAlternative {
+  id: string;
+  content: string;
+  isCorrect: boolean;
+}
+
+export interface GradingAnswer {
+  id: string;
+  response: string;
+  isCorrect: boolean | null;
+  points: number | null;
+  teacherComment: string | null;
+  gradedAt: string | null;
+}
+
+export interface GradingQuestion {
+  questionId: string;
+  content: string;
+  type: QuestionType;
+  maxPoints: number;
+  alternatives: GradingAlternative[];
+  answer: GradingAnswer | null;
+}
+
+export interface SubmissionDetail {
+  submission: {
+    id: string;
+    studentId: string;
+    studentName: string;
+    submittedAt: string | null;
+    score: number | null;
+    gradePublishedAt: string | null;
+  };
+  questions: GradingQuestion[];
+}
+
+export function fetchSubmissionDetail(assessmentId: string, submissionId: string): Promise<SubmissionDetail> {
+  return authFetch(`/assessments/${assessmentId}/submissions/${submissionId}`);
+}
+
+export function gradeAnswer(
+  assessmentId: string,
+  submissionId: string,
+  answerId: string,
+  input: { points: number; teacherComment?: string },
+): Promise<{ answer: GradingAnswer; submission: { id: string; score: number | null } }> {
+  return authFetch(`/assessments/${assessmentId}/submissions/${submissionId}/answers/${answerId}`, {
+    method: "PATCH",
+    body: JSON.stringify(input),
+  });
+}
+
+export function voidSubmission(assessmentId: string, submissionId: string): Promise<void> {
+  return authFetch(`/assessments/${assessmentId}/submissions/${submissionId}/void`, { method: "POST" });
+}
+
+export function voidAllSubmissions(assessmentId: string): Promise<{ deletedCount: number }> {
+  return authFetch(`/assessments/${assessmentId}/void-all`, { method: "POST" });
+}
+
+export function publishGrade(assessmentId: string, submissionId: string): Promise<{ publishedAt: string }> {
+  return authFetch(`/assessments/${assessmentId}/submissions/${submissionId}/publish-grade`, { method: "POST" });
+}
+
+export function publishAllGrades(
+  assessmentId: string,
+): Promise<{ published: string[]; skipped: { studentId: string; reason: string }[] }> {
+  return authFetch(`/assessments/${assessmentId}/publish-grades`, { method: "POST" });
+}

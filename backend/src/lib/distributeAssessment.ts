@@ -23,6 +23,7 @@ export async function distributeAssessment(
       title: assessment.title,
       workType: "ASSIGNMENT",
       state: "PUBLISHED",
+      maxPoints: 10,
       dueDate: assessment.dueAt
         ? {
             year: assessment.dueAt.getFullYear(),
@@ -36,7 +37,7 @@ export async function distributeAssessment(
 
   await prisma.assessment.update({
     where: { id: assessment.id },
-    data: { status: "PUBLISHED" },
+    data: { status: "PUBLISHED", googleCourseWorkId: courseWork.id },
   });
 
   return { courseWorkId: courseWork.id, alternateLink: courseWork.alternateLink };

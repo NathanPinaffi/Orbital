@@ -112,14 +112,15 @@ model Alternative {
 }
 
 model Assessment {
-  id               String            @id @default(cuid())
-  title            String
-  classId          String
-  class            ClassSection      @relation(fields: [classId], references: [id])
-  status           AssessmentStatus  @default(DRAFT)
-  durationMinutes  Int
-  dueAt            DateTime?
-  createdAt        DateTime          @default(now())
+  id                  String            @id @default(cuid())
+  title               String
+  classId             String
+  class               ClassSection      @relation(fields: [classId], references: [id])
+  status              AssessmentStatus  @default(DRAFT)
+  durationMinutes     Int
+  dueAt               DateTime?
+  googleCourseWorkId  String?
+  createdAt           DateTime          @default(now())
 
   questions   AssessmentQuestion[]
   submissions Submission[]
@@ -138,14 +139,15 @@ model AssessmentQuestion {
 }
 
 model Submission {
-  id           String     @id @default(cuid())
-  assessmentId String
-  assessment   Assessment @relation(fields: [assessmentId], references: [id])
-  studentId    String
-  student      User       @relation(fields: [studentId], references: [id])
-  startedAt    DateTime   @default(now())
-  submittedAt  DateTime?
-  score        Float?
+  id               String     @id @default(cuid())
+  assessmentId     String
+  assessment       Assessment @relation(fields: [assessmentId], references: [id])
+  studentId        String
+  student          User       @relation(fields: [studentId], references: [id])
+  startedAt        DateTime   @default(now())
+  submittedAt      DateTime?
+  score            Float?
+  gradePublishedAt DateTime?
 
   answers           Answer[]
   proctoringEvents  ProctoringEvent[]
@@ -161,6 +163,9 @@ model Answer {
   question       Question   @relation(fields: [questionId], references: [id])
   response       String
   isCorrect      Boolean?
+  points         Float?
+  teacherComment String?
+  gradedAt       DateTime?
   aiScore        Float?
   aiFeedback     String?
 

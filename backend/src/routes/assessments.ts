@@ -15,6 +15,7 @@ const createSchema = z.object({
   durationMinutes: z.number().int().positive(),
   classIds: z.array(z.string()).min(1),
   questionIds: z.array(z.string()).min(1),
+  dueAt: z.string().datetime().optional(),
 });
 
 /** Lista as avaliações criadas pelo professor autenticado, em qualquer turma sua. */
@@ -34,6 +35,7 @@ assessmentsRouter.get("/", async (req: AuthedRequest, res, next) => {
         className: a.class.name,
         questionCount: a._count.questions,
         createdAt: a.createdAt,
+        dueAt: a.dueAt,
       })),
     );
   } catch (err) {
@@ -51,7 +53,7 @@ assessmentsRouter.post("/", async (req: AuthedRequest, res, next) => {
     if (!parsed.success) {
       return res.status(400).json({ error: parsed.error.flatten() });
     }
-    const { title, durationMinutes, classIds, questionIds } = parsed.data;
+    const { title, durationMinutes, classIds, questionIds, dueAt } = parsed.data;
 
     const classes = await prisma.classSection.findMany({
       where: { id: { in: classIds }, teacherId: req.userId! },
@@ -76,6 +78,7 @@ assessmentsRouter.post("/", async (req: AuthedRequest, res, next) => {
           title,
           durationMinutes,
           classId: classSection.id,
+          dueAt: dueAt ? new Date(dueAt) : undefined,
           questions: {
             create: questionIds.map((questionId, index) => ({
               questionId,

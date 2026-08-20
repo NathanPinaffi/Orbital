@@ -4,7 +4,7 @@ type Variant = "primary" | "secondary" | "text";
 
 const variants: Record<Variant, string> = {
   primary:
-    "bg-gradient-to-t from-yellow-200 via-orange-400 to-orange-500 text-[#2c1306] shadow-[0_0_40px_-5px_rgba(249,115,22,0.6)] ring-1 ring-inset ring-white/40 hover:scale-[1.02] hover:shadow-[0_0_60px_-5px_rgba(249,115,22,0.8)]",
+    "bg-gradient-to-t from orange-500 to-yellow-500 via-orange-400 text-[#2c1306] shadow-[0_0_40px_-5px_rgba(249,115,22,0.1)] ring-1 ring-inset hover:scale-[1.01] hover:shadow-[0_0_60px_-5px_rgba(249,115,22,0.3)]",
   secondary: "bg-white text-black hover:bg-neutral-200",
   text: "bg-transparent text-neutral-400 hover:text-white",
 };
@@ -21,3 +21,4 @@ export function Button({
     />
   );
 }
+

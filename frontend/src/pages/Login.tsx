@@ -83,7 +83,7 @@ export default function Login() {
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-400 opacity-75" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-orange-500" />
               </span>
-              Sapere Aude
+              Estude, vença, inspire!
             </span>
             <h1 className="font-bricolage mb-2 text-3xl font-light tracking-tight text-white">
               Bem-vindo!
@@ -132,14 +132,7 @@ export default function Login() {
                 </a>
               }
             />
-
-            <label className="flex items-center gap-2 pt-1 text-xs text-neutral-400">
-              <input
-                type="checkbox"
-                className="h-3.5 w-3.5 rounded border-white/20 bg-transparent text-orange-500 focus:ring-0 focus:ring-offset-0"
-              />
-              Manter conectado por 30 dias
-            </label>
+            <br />
 
             <Button type="submit" className="mt-2">
               Entrar

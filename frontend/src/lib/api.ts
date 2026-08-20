@@ -194,6 +194,7 @@ export interface AssessmentSummary {
   className: string;
   questionCount: number;
   createdAt: string;
+  dueAt: string | null;
 }
 
 export interface CreateAssessmentInput {
@@ -201,6 +202,7 @@ export interface CreateAssessmentInput {
   durationMinutes: number;
   classIds: string[];
   questionIds: string[];
+  dueAt?: string;
 }
 
 export interface CreatedAssessment {

@@ -52,9 +52,7 @@ export const SettingsIcon = ({ className }: IconProps) => (
 );
 
 export const BellIcon = ({ className }: IconProps) => (
-  <Svg
-    className={`p-2 rounded-full hover:bg-orange-500 transition-colors ${className}`}
-  >
+  <Svg className={className}>
     <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
     <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
   </Svg>
@@ -145,6 +143,21 @@ export const XIcon = ({ className }: IconProps) => (
 export const MenuIcon = ({ className }: IconProps) => (
   <Svg className={className}>
     <path d="M4 6h16M4 12h16M4 18h16" />
+  </Svg>
+);
+
+export const CalendarIcon = ({ className }: IconProps) => (
+  <Svg className={className}>
+    <rect x="3" y="4" width="18" height="18" rx="2" />
+    <path d="M16 2v4M8 2v4M3 10h18" />
+  </Svg>
+);
+
+export const ClipboardListIcon = ({ className }: IconProps) => (
+  <Svg className={className}>
+    <rect x="8" y="2" width="8" height="4" rx="1" />
+    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+    <path d="M9 12h6M9 16h6" />
   </Svg>
 );
 

@@ -26,6 +26,7 @@ export function CreateAssessmentModal({
 
   const [title, setTitle] = useState("");
   const [durationMinutes, setDurationMinutes] = useState(60);
+  const [dueAt, setDueAt] = useState("");
   const [selectedClassIds, setSelectedClassIds] = useState<Set<string>>(new Set());
   const [selectedQuestionIds, setSelectedQuestionIds] = useState<Set<string>>(new Set());
   const [subjectFilter, setSubjectFilter] = useState(ALL);
@@ -89,6 +90,7 @@ export function CreateAssessmentModal({
         durationMinutes,
         classIds: Array.from(selectedClassIds),
         questionIds: Array.from(selectedQuestionIds),
+        dueAt: dueAt ? new Date(dueAt).toISOString() : undefined,
       });
       onCreated();
     } catch {
@@ -140,6 +142,16 @@ export function CreateAssessmentModal({
                     required
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-xs text-neutral-400">Data de entrega (opcional)</label>
+                <input
+                  type="datetime-local"
+                  className={inputClass}
+                  value={dueAt}
+                  onChange={(e) => setDueAt(e.target.value)}
+                />
               </div>
 
               <div>

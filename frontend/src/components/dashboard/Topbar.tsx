@@ -25,7 +25,7 @@ export function Topbar() {
           />
         </div>
 
-        <button className="relative shrink-0 rounded-full border border-white/10 bg-white/5 p-2.5 text-neutral-300 transition-colors hover:text-white">
+        <button className="relative shrink-0 rounded-full border border-white/10 bg-white/5 p-2.5 text-neutral-300 transition-colors hover:bg-orange-500/20 hover:text-orange-400">
           <BellIcon className="h-4 w-4" />
           <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-orange-500" />
         </button>

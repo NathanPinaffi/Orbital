@@ -93,7 +93,7 @@ export function Sidebar({
               active
                 ? "bg-white/[0.06] text-white ring-1 ring-white/10"
                 : item.to
-                  ? "text-neutral-400 hover:text-white"
+                  ? "text-neutral-400 hover:bg-orange-500/10 hover:text-orange-400"
                   : "cursor-not-allowed text-neutral-600"
             }`;
             const content = (

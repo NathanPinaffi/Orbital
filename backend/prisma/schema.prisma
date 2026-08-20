@@ -112,13 +112,14 @@ model Alternative {
 }
 
 model Assessment {
-  id          String            @id @default(cuid())
-  title       String
-  classId     String
-  class       ClassSection      @relation(fields: [classId], references: [id])
-  status      AssessmentStatus  @default(DRAFT)
-  dueAt       DateTime?
-  createdAt   DateTime          @default(now())
+  id               String            @id @default(cuid())
+  title            String
+  classId          String
+  class            ClassSection      @relation(fields: [classId], references: [id])
+  status           AssessmentStatus  @default(DRAFT)
+  durationMinutes  Int
+  dueAt            DateTime?
+  createdAt        DateTime          @default(now())
 
   questions   AssessmentQuestion[]
   submissions Submission[]

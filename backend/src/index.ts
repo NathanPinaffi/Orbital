@@ -4,6 +4,10 @@ import cors from "cors";
 import { authRouter } from "./routes/auth.js";
 import { googleAuthRouter } from "./routes/googleAuth.js";
 import { classroomRouter } from "./routes/classroom.js";
+import { questionsRouter } from "./routes/questions.js";
+import { classesRouter } from "./routes/classes.js";
+import { assessmentsRouter } from "./routes/assessments.js";
+import { examsRouter } from "./routes/exams.js";
 
 const app = express();
 
@@ -14,6 +18,10 @@ app.get("/health", (_req, res) => res.json({ status: "ok" }));
 app.use("/auth", authRouter);
 app.use("/auth", googleAuthRouter);
 app.use("/classroom", classroomRouter);
+app.use("/questions", questionsRouter);
+app.use("/classes", classesRouter);
+app.use("/assessments", assessmentsRouter);
+app.use("/exams", examsRouter);
 
 app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error(err);

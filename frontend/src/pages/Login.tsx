@@ -14,6 +14,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [params] = useSearchParams();
   const googleAuthFailed = params.get("error") === "google_auth_failed";
+  const redirect = params.get("redirect") ?? undefined;
 
   const splashLogoRef = useRef<HTMLImageElement>(null);
   const finalLogoRef = useRef<HTMLImageElement>(null);
@@ -66,8 +67,8 @@ export default function Login() {
         <img ref={splashLogoRef} src={logo} alt="Orbital" className="h-16 w-auto rounded-md" />
       </div>
 
-      <div className="mb-10">
-        <img ref={finalLogoRef} src={logo} alt="Orbital" className="h-30 w-auto rounded-md" />
+      <div className="mb-8 sm:mb-10">
+        <img ref={finalLogoRef} src={logo} alt="Orbital" className="h-14 w-auto max-w-full rounded-md sm:h-20 md:h-24" />
       </div>
 
       <div
@@ -95,7 +96,7 @@ export default function Login() {
             </p>
           )}
 
-          <Button type="button" variant="secondary" className="mb-6" onClick={loginWithGoogle}>
+          <Button type="button" variant="secondary" className="mb-6" onClick={() => loginWithGoogle(redirect)}>
             <GoogleIcon />
             Entrar com Google Sala de Aula
           </Button>

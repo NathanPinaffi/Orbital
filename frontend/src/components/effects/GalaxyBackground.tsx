@@ -22,7 +22,7 @@ const HUE_COLOR: Record<Star["hue"], string> = {
  * e gira lentamente, como uma galáxia. Inspirado em reactbits.dev/backgrounds/galaxy.
  */
 export function GalaxyBackground({
-  density = 1,
+  density = 3,
   className = "",
 }: {
   density?: number;
@@ -50,7 +50,7 @@ export function GalaxyBackground({
       ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
 
-    const count = Math.round(120 * density);
+    const count = Math.round(240 * density);
     const stars: Star[] = Array.from({ length: count }, () => ({
       x: Math.random() * 2 - 1,
       y: Math.random() * 2 - 1,

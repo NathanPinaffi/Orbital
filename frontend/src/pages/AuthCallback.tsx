@@ -10,7 +10,8 @@ export default function AuthCallback() {
     const token = params.get("token");
     if (token) {
       saveToken(token);
-      navigate("/dashboard", { replace: true });
+      const redirect = params.get("redirect");
+      navigate(redirect || "/dashboard", { replace: true });
     } else {
       navigate("/login?error=google_auth_failed", { replace: true });
     }

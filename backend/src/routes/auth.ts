@@ -3,8 +3,14 @@ import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { prisma } from "../lib/prisma.js";
 import { signUserToken } from "../lib/jwt.js";
+import { requireAuth, type AuthedRequest } from "../lib/authMiddleware.js";
 
 export const authRouter = Router();
+
+authRouter.get("/me", requireAuth, async (req: AuthedRequest, res) => {
+  const user = await prisma.user.findUniqueOrThrow({ where: { id: req.userId! } });
+  res.json({ id: user.id, name: user.name, email: user.email, role: user.role });
+});
 
 const loginSchema = z.object({
   email: z.string().email(),

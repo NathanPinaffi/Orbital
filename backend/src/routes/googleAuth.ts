@@ -9,8 +9,9 @@ export const googleAuthRouter = Router();
 const FRONTEND_URL = process.env.FRONTEND_URL ?? "http://localhost:5173";
 
 // 1) Front-end redireciona o usuário para cá.
-googleAuthRouter.get("/google", (_req, res) => {
-  res.redirect(getAuthUrl());
+googleAuthRouter.get("/google", (req, res) => {
+  const redirect = typeof req.query.redirect === "string" ? req.query.redirect : undefined;
+  res.redirect(getAuthUrl(redirect));
 });
 
 // 2) Google redireciona de volta para cá com ?code=...
@@ -56,7 +57,9 @@ googleAuthRouter.get("/google/callback", async (req, res) => {
     });
 
     const jwtToken = signUserToken(user);
-    res.redirect(`${FRONTEND_URL}/auth/callback?token=${jwtToken}`);
+    const state = typeof req.query.state === "string" ? req.query.state : undefined;
+    const redirectParam = state ? `&redirect=${encodeURIComponent(state)}` : "";
+    res.redirect(`${FRONTEND_URL}/auth/callback?token=${jwtToken}${redirectParam}`);
   } catch (err) {
     console.error("Falha na autenticação Google:", err);
     res.redirect(`${FRONTEND_URL}/login?error=google_auth_failed`);

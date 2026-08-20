@@ -2,6 +2,9 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Classrooms from "./pages/Classrooms";
+import QuestionBank from "./pages/QuestionBank";
+import Assessments from "./pages/Assessments";
+import Exam from "./pages/Exam";
 import AuthCallback from "./pages/AuthCallback";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
@@ -17,6 +20,30 @@ export default function App() {
           element={
             <ProtectedRoute>
               <Classrooms />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/banco-de-questoes"
+          element={
+            <ProtectedRoute>
+              <QuestionBank />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/avaliacoes"
+          element={
+            <ProtectedRoute>
+              <Assessments />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/assessments/:id"
+          element={
+            <ProtectedRoute>
+              <Exam />
             </ProtectedRoute>
           }
         />

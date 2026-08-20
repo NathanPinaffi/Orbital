@@ -1,4 +1,4 @@
-import { BellIcon, PlusIcon, SearchIcon } from "../ui/dashboardIcons";
+import { BellIcon, SearchIcon } from "../ui/dashboardIcons";
 
 export function Topbar() {
   return (

@@ -16,16 +16,20 @@ export default function Classrooms() {
   const { status, courses } = useClassroomCourses();
   const [syncState, setSyncState] = useState<SyncState>("idle");
   const [classSectionByCourseId, setClassSectionByCourseId] = useState<Record<string, { id: string; students: number }>>({});
+  const [missingEmailWarning, setMissingEmailWarning] = useState<number | null>(null);
 
   async function runSync() {
     setSyncState("syncing");
     try {
       const result = await importAllClassroomCourses();
       const map: Record<string, { id: string; students: number }> = {};
+      let missingEmailTotal = 0;
       for (const item of result.imported) {
         map[item.courseId] = { id: item.classSectionId, students: item.studentsImported };
+        missingEmailTotal += item.missingEmail;
       }
       setClassSectionByCourseId(map);
+      setMissingEmailWarning(missingEmailTotal > 0 ? missingEmailTotal : null);
       setSyncState("done");
     } catch {
       setSyncState("error");
@@ -58,6 +62,14 @@ export default function Classrooms() {
             </button>
           )}
         </header>
+
+        {missingEmailWarning != null && (
+          <GlassCard data-animate className="mb-4 max-w-xl border-amber-500/20 bg-amber-500/5 p-4 text-sm text-amber-300">
+            {missingEmailWarning} aluno(s) não puderam ser matriculados porque o Google não retornou o e-mail deles.
+            Isso costuma ser resolvido reconectando sua conta Google (saia e entre novamente) para conceder a
+            permissão de e-mail do Sala de Aula.
+          </GlassCard>
+        )}
 
         {status === "loading" && (
           <div data-animate className="space-y-3">

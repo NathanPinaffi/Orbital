@@ -75,7 +75,13 @@ export function importClassroomCourse(
 }
 
 export interface ImportAllResult {
-  imported: Array<{ courseId: string; classSectionId: string; className: string; studentsImported: number }>;
+  imported: Array<{
+    courseId: string;
+    classSectionId: string;
+    className: string;
+    studentsImported: number;
+    missingEmail: number;
+  }>;
   skipped: Array<{ courseId: string; reason: string }>;
 }
 

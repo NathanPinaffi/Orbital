@@ -4,6 +4,7 @@ import { ExamShell } from "../components/exam/ExamShell";
 import { ExamWarning } from "../components/exam/ExamWarning";
 import { ExamRunner } from "../components/exam/ExamRunner";
 import { CheckCircleIcon } from "../components/ui/dashboardIcons";
+import { HappyPlanet } from "../components/exam/HappyPlanet";
 import { ApiError, fetchExam, startExam, submitExam, type ExamState } from "../lib/api";
 
 export default function Exam() {
@@ -88,7 +89,7 @@ export default function Exam() {
 
       {!error && state?.status === "submitted" && (
         <div className="rounded-[28px] border border-white/10 bg-[#0A0A0A] p-10 text-center">
-          <CheckCircleIcon className="mx-auto mb-4 h-10 w-10 text-emerald-400" />
+          <HappyPlanet className="mx-auto mb-4 h-28 w-28" />
           <h1 className="font-bricolage mb-2 text-2xl font-light tracking-tight text-white">Prova enviada!</h1>
           {(finalScore ?? state.score) != null ? (
             <p className="text-sm text-neutral-400">

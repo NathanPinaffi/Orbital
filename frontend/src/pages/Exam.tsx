@@ -3,7 +3,6 @@ import { useParams } from "react-router-dom";
 import { ExamShell } from "../components/exam/ExamShell";
 import { ExamWarning } from "../components/exam/ExamWarning";
 import { ExamRunner } from "../components/exam/ExamRunner";
-import { CheckCircleIcon } from "../components/ui/dashboardIcons";
 import { HappyPlanet } from "../components/exam/HappyPlanet";
 import { ApiError, fetchExam, startExam, submitExam, type ExamState } from "../lib/api";
 
@@ -96,8 +95,11 @@ export default function Exam() {
               Nota: <span className="text-white">{(finalScore ?? state.score)!.toFixed(1)}</span> / 10
             </p>
           ) : (
+          <>
+            <p className="text-sm text-neutral-800">Boa sorte!</p>
             <p className="text-sm text-neutral-400">Sua prova será corrigida em breve.</p>
-          )}
+          </>
+        )}
         </div>
       )}
     </ExamShell>

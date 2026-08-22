@@ -75,7 +75,7 @@ export default function Login() {
         ref={cardRef}
         className="electric-card relative max-h-[800px] w-full max-w-[400px] overflow-hidden rounded-[32px] bg-neutral-900 p-[2px]"
       >
-        <div className="absolute inset-0 z-0 bg-gradient-to-b from-yellow-300 via-orange-500 to-transparent opacity-60" />
+        <div className="absolute inset-0 z-0 bg-gradient-to-b from-yellow-300 via-orange-500 to-purple-700 opacity-60" />
         <div className="relative z-10 h-full rounded-[30px] bg-[#0A0A0A] p-8 sm:p-10">
           <div className="mb-8 text-center">
             <span className="mb-5 inline-flex items-center gap-1.5 rounded border border-white/10 bg-white/5 px-2 py-1 text-[10px] uppercase text-neutral-400">

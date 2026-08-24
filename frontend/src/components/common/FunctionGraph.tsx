@@ -1,9 +1,9 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { compile } from "mathjs";
 
-const WIDTH = 480;
-const HEIGHT = 300;
-const PADDING = 28;
+const WIDTH = 240;
+const HEIGHT = 150;
+const PADDING = 14;
 
 export interface GraphSpec {
   expression: string;
@@ -65,6 +65,7 @@ function buildPaths(expression: string, xMin: number, xMax: number, yMin: number
 export function FunctionGraph({ spec, className }: { spec: GraphSpec; className?: string }) {
   const { expression, xMin, xMax, yMin, yMax } = spec;
   const clipId = useMemo(() => `graph-clip-${Math.random().toString(36).slice(2)}`, []);
+  const [open, setOpen] = useState(false);
 
   const { paths, error } = useMemo(
     () => buildPaths(expression, xMin, xMax, yMin, yMax),
@@ -73,6 +74,17 @@ export function FunctionGraph({ spec, className }: { spec: GraphSpec; className?
 
   const showXAxis = yMin <= 0 && yMax >= 0;
   const showYAxis = xMin <= 0 && xMax >= 0;
+
+  const toggleButton = (
+    <button
+      type="button"
+      onClick={() => setOpen((v) => !v)}
+      className="flex w-full items-center justify-between rounded-lg px-1 py-1 text-left text-sm font-semibold text-orange-400 transition hover:text-orange-300"
+    >
+      <span>Gráfico</span>
+      <span className="text-xs text-orange-400/70">{open ? "Ocultar ▲" : "Mostrar ▼"}</span>
+    </button>
+  );
 
   if (error) {
     return (
@@ -84,7 +96,9 @@ export function FunctionGraph({ spec, className }: { spec: GraphSpec; className?
 
   return (
     <div className={`rounded-lg border border-white/10 bg-white/[0.02] p-2 ${className ?? ""}`}>
-      <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className="w-full" role="img" aria-label={`Gráfico de ${expression}`}>
+      {toggleButton}
+      {open && (
+      <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className="mt-2 w-full" role="img" aria-label={`Gráfico de ${expression}`}>
         <defs>
           <clipPath id={clipId}>
             <rect x={PADDING} y={PADDING} width={WIDTH - 2 * PADDING} height={HEIGHT - 2 * PADDING} />
@@ -143,6 +157,7 @@ export function FunctionGraph({ spec, className }: { spec: GraphSpec; className?
           {yMin}
         </text>
       </svg>
+      )}
     </div>
   );
 }

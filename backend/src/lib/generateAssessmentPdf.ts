@@ -1,6 +1,7 @@
 import PDFDocument from "pdfkit";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { drawRichText } from "./richText.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const LOGO_PATH = path.join(__dirname, "..", "..", "assets", "logo-black.png");
@@ -109,14 +110,22 @@ export function generateAssessmentPdf({
   doc.addPage();
 
   questions.forEach((question, index) => {
-    doc.font("Times-Bold").fontSize(12).text(`Q${index + 1}. `, MARGIN, doc.y, { continued: true });
+    const prefix = `Q${index + 1}. `;
+    const questionTop = doc.y;
+    doc.font("Times-Bold").fontSize(12).text(prefix, MARGIN, questionTop, { lineBreak: false });
+    const prefixWidth = doc.widthOfString(prefix);
     const pointsLabel = question.points === 1 ? "ponto" : "pontos";
-    doc.font("Times-Roman").fontSize(12).text(`${question.content} (${formatPoints(question.points)} ${pointsLabel})`);
+    const bodyText = `${question.content} (${formatPoints(question.points)} ${pointsLabel})`;
+    doc.y = drawRichText(doc, bodyText, MARGIN + prefixWidth, questionTop, usableWidth - prefixWidth, 12, "Times-Roman");
     doc.moveDown(0.4);
 
     if (question.type === "MULTIPLE_CHOICE" || question.type === "TRUE_FALSE") {
       question.alternatives.forEach((alt, altIndex) => {
-        doc.font("Times-Roman").fontSize(11).text(`${LETTERS[altIndex] ?? "?"}) ${alt.content}`, { indent: 20 });
+        const label = `${LETTERS[altIndex] ?? "?"}) `;
+        const altTop = doc.y;
+        doc.font("Times-Roman").fontSize(11).text(label, MARGIN + 20, altTop, { lineBreak: false });
+        const labelWidth = doc.widthOfString(label);
+        doc.y = drawRichText(doc, alt.content, MARGIN + 20 + labelWidth, altTop, usableWidth - 20 - labelWidth, 11, "Times-Roman");
       });
     } else {
       const lineCount = question.requiresSketch ? 2 : 5;

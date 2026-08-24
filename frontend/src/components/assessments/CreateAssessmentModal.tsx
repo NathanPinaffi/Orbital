@@ -216,7 +216,7 @@ export function CreateAssessmentModal({
                 </div>
 
                 {questions.length === 0 ? (
-                  <p className="text-xs text-neutral-500">Nenhuma questão no banco ainda.</p>
+                  <p className="text-xs text-neutral-500">Nenhuma questão disponível ainda.</p>
                 ) : (
                   <div className="max-h-64 space-y-1.5 overflow-y-auto rounded-lg border border-white/5 p-2">
                     {filteredQuestions.map((q) => (
@@ -233,7 +233,7 @@ export function CreateAssessmentModal({
                         <span className="line-clamp-1">
                           {q.content}{" "}
                           <span className="text-neutral-600">
-                            ({q.subject} · {q.topic})
+                            ({q.subject} · {q.topic} · {q.bank.name})
                           </span>
                         </span>
                       </label>

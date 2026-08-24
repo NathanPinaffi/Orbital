@@ -128,6 +128,23 @@ export interface Alternative {
   isCorrect: boolean;
 }
 
+export type BankVisibility = "PRIVATE" | "PUBLIC";
+
+export interface QuestionBankSummary {
+  id: string;
+  name: string;
+  visibility: BankVisibility;
+  ownerName: string;
+  questionCount: number;
+}
+
+export interface QuestionBankLite {
+  id: string;
+  name: string;
+  visibility: BankVisibility;
+  ownerId: string;
+}
+
 export interface Question {
   id: string;
   subject: string;
@@ -138,11 +155,13 @@ export interface Question {
   bloomLevel: BloomLevel;
   alternatives: Alternative[];
   createdAt: string;
+  bank: QuestionBankLite;
 }
 
 export type QuestionInput =
   | {
       type: "MULTIPLE_CHOICE";
+      bankId: string;
       subject: string;
       topic: string;
       content: string;
@@ -152,6 +171,7 @@ export type QuestionInput =
     }
   | {
       type: "TRUE_FALSE";
+      bankId: string;
       subject: string;
       topic: string;
       content: string;
@@ -161,6 +181,7 @@ export type QuestionInput =
     }
   | {
       type: "ESSAY";
+      bankId: string;
       subject: string;
       topic: string;
       content: string;
@@ -168,8 +189,27 @@ export type QuestionInput =
       bloomLevel: BloomLevel;
     };
 
-export function fetchQuestions(): Promise<Question[]> {
-  return authFetch("/questions");
+export function fetchQuestionBanks(): Promise<{ mine: QuestionBankSummary[]; public: QuestionBankSummary[] }> {
+  return authFetch("/question-banks");
+}
+
+export function createQuestionBank(input: { name: string; visibility: BankVisibility }): Promise<QuestionBankSummary> {
+  return authFetch("/question-banks", { method: "POST", body: JSON.stringify(input) });
+}
+
+export function updateQuestionBank(
+  id: string,
+  input: Partial<{ name: string; visibility: BankVisibility }>,
+): Promise<QuestionBankSummary> {
+  return authFetch(`/question-banks/${id}`, { method: "PATCH", body: JSON.stringify(input) });
+}
+
+export function deleteQuestionBank(id: string): Promise<void> {
+  return authFetch(`/question-banks/${id}`, { method: "DELETE" });
+}
+
+export function fetchQuestions(bankId?: string): Promise<Question[]> {
+  return authFetch(bankId ? `/questions?bankId=${bankId}` : "/questions");
 }
 
 export function createQuestion(input: QuestionInput): Promise<Question> {

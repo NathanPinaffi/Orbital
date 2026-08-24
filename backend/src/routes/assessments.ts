@@ -63,7 +63,7 @@ assessmentsRouter.post("/", async (req: AuthedRequest, res, next) => {
     }
 
     const questions = await prisma.question.findMany({
-      where: { id: { in: questionIds }, authorId: req.userId! },
+      where: { id: { in: questionIds }, bank: { OR: [{ ownerId: req.userId! }, { visibility: "PUBLIC" }] } },
     });
     if (questions.length !== questionIds.length) {
       return res.status(404).json({ error: "Uma ou mais questões não foram encontradas" });

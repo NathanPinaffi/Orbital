@@ -37,12 +37,14 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 export function QuestionFormModal({
   question,
+  bankId,
   subjectOptions,
   topicOptions,
   onClose,
   onSubmit,
 }: {
   question?: Question;
+  bankId: string;
   subjectOptions: string[];
   topicOptions: string[];
   onClose: () => void;
@@ -92,7 +94,7 @@ export function QuestionFormModal({
     e.preventDefault();
     setError(null);
 
-    const common = { subject, topic, content, difficulty, bloomLevel };
+    const common = { bankId, subject, topic, content, difficulty, bloomLevel };
     let input: QuestionInput;
 
     if (type === "MULTIPLE_CHOICE") {

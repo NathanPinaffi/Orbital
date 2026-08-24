@@ -53,6 +53,11 @@ enum NotificationType {
   NEW_ASSESSMENT
 }
 
+enum BankVisibility {
+  PRIVATE
+  PUBLIC
+}
+
 model User {
   id                String   @id @default(cuid())
   name              String
@@ -67,6 +72,7 @@ model User {
   classesTeaching   ClassSection[]     @relation("TeacherClasses")
   enrollments       Enrollment[]
   questionsCreated  Question[]
+  questionBanks     QuestionBank[]
   submissions       Submission[]
   notifications     Notification[]
 }
@@ -93,10 +99,25 @@ model Enrollment {
   @@unique([studentId, classId])
 }
 
+model QuestionBank {
+  id         String         @id @default(cuid())
+  name       String
+  ownerId    String
+  owner      User           @relation(fields: [ownerId], references: [id])
+  visibility BankVisibility @default(PRIVATE)
+  createdAt  DateTime       @default(now())
+
+  questions Question[]
+
+  @@index([ownerId])
+}
+
 model Question {
   id          String       @id @default(cuid())
   authorId    String
   author      User         @relation(fields: [authorId], references: [id])
+  bankId      String
+  bank        QuestionBank @relation(fields: [bankId], references: [id])
   subject     String
   topic       String
   content     String

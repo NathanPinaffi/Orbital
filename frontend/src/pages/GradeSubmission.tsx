@@ -6,6 +6,7 @@ import { GlassCard } from "../components/dashboard/GlassCard";
 import { ConfirmModal } from "../components/grading/ConfirmModal";
 import { EssayGrader } from "../components/grading/EssayGrader";
 import { MathText } from "../components/common/MathText";
+import { FunctionGraph } from "../components/common/FunctionGraph";
 import { useGsapEntrance } from "../hooks/useGsapEntrance";
 import { initials } from "../hooks/useMe";
 import {
@@ -155,6 +156,8 @@ export default function GradeSubmission() {
                   <p className="mb-3 text-sm text-white">
                     <MathText text={q.content} />
                   </p>
+
+                  {q.graph && <FunctionGraph spec={q.graph} className="mb-3" />}
 
                   {q.type === "ESSAY" ? (
                     <EssayGrader question={q} onSave={(points, comment) => handleGrade(q.questionId, q.answer!.id, points, comment)} />

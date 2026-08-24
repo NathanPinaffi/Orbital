@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { PlusIcon, TrashIcon, XIcon } from "../ui/dashboardIcons";
 import { MathText } from "../common/MathText";
+import { FunctionGraph } from "../common/FunctionGraph";
 import type { BloomLevel, Difficulty, Question, QuestionInput, QuestionType } from "../../lib/api";
 
 const DIFFICULTY_LABEL: Record<Difficulty, string> = {
@@ -68,6 +69,12 @@ export function QuestionFormModal({
   const [correctAnswer, setCorrectAnswer] = useState(
     question?.type === "TRUE_FALSE" ? question.alternatives.find((a) => a.isCorrect)?.content === "Verdadeiro" : true,
   );
+  const [graphEnabled, setGraphEnabled] = useState(question?.graph != null);
+  const [graphExpression, setGraphExpression] = useState(question?.graph?.expression ?? "x^2");
+  const [graphXMin, setGraphXMin] = useState(question?.graph?.xMin ?? -10);
+  const [graphXMax, setGraphXMax] = useState(question?.graph?.xMax ?? 10);
+  const [graphYMin, setGraphYMin] = useState(question?.graph?.yMin ?? -10);
+  const [graphYMax, setGraphYMax] = useState(question?.graph?.yMax ?? 10);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -95,7 +102,26 @@ export function QuestionFormModal({
     e.preventDefault();
     setError(null);
 
-    const common = { bankId, subject, topic, content, difficulty, bloomLevel };
+    if (graphEnabled) {
+      if (!graphExpression.trim()) {
+        setError("Digite a expressão do gráfico ou desative essa opção.");
+        return;
+      }
+      if (graphXMax <= graphXMin) {
+        setError("O máximo de X do gráfico deve ser maior que o mínimo.");
+        return;
+      }
+      if (graphYMax <= graphYMin) {
+        setError("O máximo de Y do gráfico deve ser maior que o mínimo.");
+        return;
+      }
+    }
+
+    const graph = graphEnabled
+      ? { expression: graphExpression.trim(), xMin: graphXMin, xMax: graphXMax, yMin: graphYMin, yMax: graphYMax }
+      : null;
+
+    const common = { bankId, subject, topic, content, difficulty, bloomLevel, graph };
     let input: QuestionInput;
 
     if (type === "MULTIPLE_CHOICE") {
@@ -234,6 +260,71 @@ export function QuestionFormModal({
                 </div>
               )}
             </Field>
+
+            <div className="rounded-lg border border-white/10 bg-white/[0.02] p-3">
+              <label className="flex items-center gap-2 text-xs text-neutral-300">
+                <input
+                  type="checkbox"
+                  checked={graphEnabled}
+                  onChange={(e) => setGraphEnabled(e.target.checked)}
+                  className="h-3.5 w-3.5 shrink-0 rounded border-white/20 bg-transparent accent-orange-500 text-orange-500 focus:ring-0"
+                />
+                Incluir gráfico de função (ex: análise de f(x))
+              </label>
+
+              {graphEnabled && (
+                <div className="mt-3 space-y-3">
+                  <Field label="Expressão (em função de x)">
+                    <input
+                      className={inputClass}
+                      value={graphExpression}
+                      onChange={(e) => setGraphExpression(e.target.value)}
+                      placeholder="Ex: x^2 - 3*x + 2, sin(x), sqrt(x)"
+                    />
+                  </Field>
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                    <Field label="X mín">
+                      <input
+                        type="number"
+                        className={inputClass}
+                        value={graphXMin}
+                        onChange={(e) => setGraphXMin(Number(e.target.value))}
+                      />
+                    </Field>
+                    <Field label="X máx">
+                      <input
+                        type="number"
+                        className={inputClass}
+                        value={graphXMax}
+                        onChange={(e) => setGraphXMax(Number(e.target.value))}
+                      />
+                    </Field>
+                    <Field label="Y mín">
+                      <input
+                        type="number"
+                        className={inputClass}
+                        value={graphYMin}
+                        onChange={(e) => setGraphYMin(Number(e.target.value))}
+                      />
+                    </Field>
+                    <Field label="Y máx">
+                      <input
+                        type="number"
+                        className={inputClass}
+                        value={graphYMax}
+                        onChange={(e) => setGraphYMax(Number(e.target.value))}
+                      />
+                    </Field>
+                  </div>
+
+                  {graphExpression.trim() && graphXMax > graphXMin && graphYMax > graphYMin && (
+                    <FunctionGraph
+                      spec={{ expression: graphExpression, xMin: graphXMin, xMax: graphXMax, yMin: graphYMin, yMax: graphYMax }}
+                    />
+                  )}
+                </div>
+              )}
+            </div>
 
             {type === "MULTIPLE_CHOICE" && (
               <div>

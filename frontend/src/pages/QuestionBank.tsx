@@ -3,6 +3,7 @@ import { AppShell } from "../components/layout/AppShell";
 import { GlassCard } from "../components/dashboard/GlassCard";
 import { PencilIcon, PlusIcon, TrashIcon } from "../components/ui/dashboardIcons";
 import { MathText } from "../components/common/MathText";
+import { FunctionGraph } from "../components/common/FunctionGraph";
 import { QuestionFormModal } from "../components/questions/QuestionFormModal";
 import { CreateBankModal } from "../components/questions/CreateBankModal";
 import { useGsapEntrance } from "../hooks/useGsapEntrance";
@@ -368,6 +369,8 @@ export default function QuestionBank() {
                 <p className="line-clamp-3 text-sm text-white">
                   <MathText text={q.content} />
                 </p>
+
+                {q.graph && <FunctionGraph spec={q.graph} />}
 
                 <div className="mt-auto flex flex-wrap gap-1.5 text-[10px] text-neutral-500">
                   <span className="rounded-md bg-white/5 px-2 py-0.5 ring-1 ring-white/10">{q.subject}</span>

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ClockIcon } from "../ui/dashboardIcons";
 import { MathText } from "../common/MathText";
+import { FunctionGraph } from "../common/FunctionGraph";
 import { RestScreen } from "./RestScreen";
 import type { ExamQuestion } from "../../lib/api";
 
@@ -184,6 +185,8 @@ export function ExamRunner({
             <p className="mb-5 text-sm leading-relaxed text-white">
               <MathText text={q.content} />
             </p>
+
+            {q.graph && <FunctionGraph spec={q.graph} className="mb-5" />}
 
             {q.type === "ESSAY" ? (
               <textarea

@@ -99,6 +99,16 @@ examsRouter.get("/:assessmentId", async (req: AuthedRequest, res, next) => {
         content: aq.question.content,
         type: aq.question.type,
         alternatives,
+        graph:
+          aq.question.graphExpression != null
+            ? {
+                expression: aq.question.graphExpression,
+                xMin: aq.question.graphXMin!,
+                xMax: aq.question.graphXMax!,
+                yMin: aq.question.graphYMin!,
+                yMax: aq.question.graphYMax!,
+              }
+            : null,
       };
     });
 

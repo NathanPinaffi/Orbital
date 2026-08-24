@@ -126,6 +126,12 @@ model Question {
   bloomLevel  BloomLevel
   createdAt   DateTime     @default(now())
 
+  graphExpression String?
+  graphXMin       Float?
+  graphXMax       Float?
+  graphYMin       Float?
+  graphYMax       Float?
+
   alternatives     Alternative[]
   assessmentLinks  AssessmentQuestion[]
   answers          Answer[]

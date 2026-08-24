@@ -223,6 +223,16 @@ assessmentsRouter.get("/:assessmentId/submissions/:submissionId", async (req: Au
         type: aq.question.type,
         maxPoints: aq.points,
         alternatives: aq.question.alternatives.map((alt) => ({ id: alt.id, content: alt.content, isCorrect: alt.isCorrect })),
+        graph:
+          aq.question.graphExpression != null
+            ? {
+                expression: aq.question.graphExpression,
+                xMin: aq.question.graphXMin!,
+                xMax: aq.question.graphXMax!,
+                yMin: aq.question.graphYMin!,
+                yMax: aq.question.graphYMax!,
+              }
+            : null,
         answer: answer
           ? {
               id: answer.id,

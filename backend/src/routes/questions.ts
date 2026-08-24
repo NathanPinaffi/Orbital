@@ -9,6 +9,17 @@ questionsRouter.use(requireAuth, requireRole("TEACHER", "ADMIN"));
 const difficultySchema = z.enum(["EASY", "MEDIUM", "HARD"]);
 const bloomLevelSchema = z.enum(["REMEMBER", "UNDERSTAND", "APPLY", "ANALYZE", "EVALUATE", "CREATE"]);
 
+const graphSchema = z
+  .object({
+    graphExpression: z.string().min(1),
+    graphXMin: z.number(),
+    graphXMax: z.number(),
+    graphYMin: z.number(),
+    graphYMax: z.number(),
+  })
+  .refine((g) => g.graphXMax > g.graphXMin, { message: "O máximo de X deve ser maior que o mínimo" })
+  .refine((g) => g.graphYMax > g.graphYMin, { message: "O máximo de Y deve ser maior que o mínimo" });
+
 const baseFields = {
   bankId: z.string().min(1),
   subject: z.string().min(1),
@@ -16,6 +27,7 @@ const baseFields = {
   content: z.string().min(1),
   difficulty: difficultySchema,
   bloomLevel: bloomLevelSchema,
+  graph: graphSchema.nullable().optional(),
 };
 
 const questionSchema = z.discriminatedUnion("type", [
@@ -53,6 +65,25 @@ function alternativesForCreate(body: z.infer<typeof questionSchema>) {
   return [];
 }
 
+function serializeQuestion<
+  T extends {
+    graphExpression: string | null;
+    graphXMin: number | null;
+    graphXMax: number | null;
+    graphYMin: number | null;
+    graphYMax: number | null;
+  },
+>(question: T) {
+  const { graphExpression, graphXMin, graphXMax, graphYMin, graphYMax, ...rest } = question;
+  return {
+    ...rest,
+    graph:
+      graphExpression != null
+        ? { expression: graphExpression, xMin: graphXMin!, xMax: graphXMax!, yMin: graphYMin!, yMax: graphYMax! }
+        : null,
+  };
+}
+
 /** Carrega um banco garantindo que o professor pode ler dele (dono ou banco público). */
 async function loadReadableBank(bankId: string, userId: string) {
   const bank = await prisma.questionBank.findUnique({ where: { id: bankId } });
@@ -82,7 +113,7 @@ questionsRouter.get("/", async (req: AuthedRequest, res, next) => {
     });
     res.json(
       questions.map((q) => ({
-        ...q,
+        ...serializeQuestion(q),
         bank: { id: q.bank.id, name: q.bank.name, visibility: q.bank.visibility, ownerId: q.bank.ownerId },
       })),
     );
@@ -114,12 +145,17 @@ questionsRouter.post("/", async (req: AuthedRequest, res, next) => {
         type: body.type,
         difficulty: body.difficulty,
         bloomLevel: body.bloomLevel,
+        graphExpression: body.graph?.graphExpression ?? null,
+        graphXMin: body.graph?.graphXMin ?? null,
+        graphXMax: body.graph?.graphXMax ?? null,
+        graphYMin: body.graph?.graphYMin ?? null,
+        graphYMax: body.graph?.graphYMax ?? null,
         alternatives: { create: alternativesForCreate(body) },
       },
       include: { alternatives: true },
     });
 
-    res.status(201).json(question);
+    res.status(201).json(serializeQuestion(question));
   } catch (err) {
     next(err);
   }
@@ -157,13 +193,18 @@ questionsRouter.put("/:id", async (req: AuthedRequest, res, next) => {
           type: body.type,
           difficulty: body.difficulty,
           bloomLevel: body.bloomLevel,
+          graphExpression: body.graph?.graphExpression ?? null,
+          graphXMin: body.graph?.graphXMin ?? null,
+          graphXMax: body.graph?.graphXMax ?? null,
+          graphYMin: body.graph?.graphYMin ?? null,
+          graphYMax: body.graph?.graphYMax ?? null,
           alternatives: { create: alternativesForCreate(body) },
         },
         include: { alternatives: true },
       });
     });
 
-    res.json(question);
+    res.json(serializeQuestion(question));
   } catch (err) {
     next(err);
   }

@@ -128,6 +128,14 @@ export interface Alternative {
   isCorrect: boolean;
 }
 
+export interface QuestionGraph {
+  expression: string;
+  xMin: number;
+  xMax: number;
+  yMin: number;
+  yMax: number;
+}
+
 export type BankVisibility = "PRIVATE" | "PUBLIC";
 
 export interface QuestionBankSummary {
@@ -156,6 +164,7 @@ export interface Question {
   alternatives: Alternative[];
   createdAt: string;
   bank: QuestionBankLite;
+  graph: QuestionGraph | null;
 }
 
 export type QuestionInput =
@@ -168,6 +177,7 @@ export type QuestionInput =
       difficulty: Difficulty;
       bloomLevel: BloomLevel;
       alternatives: { content: string; isCorrect: boolean }[];
+      graph?: QuestionGraph | null;
     }
   | {
       type: "TRUE_FALSE";
@@ -178,6 +188,7 @@ export type QuestionInput =
       difficulty: Difficulty;
       bloomLevel: BloomLevel;
       correctAnswer: boolean;
+      graph?: QuestionGraph | null;
     }
   | {
       type: "ESSAY";
@@ -187,6 +198,7 @@ export type QuestionInput =
       content: string;
       difficulty: Difficulty;
       bloomLevel: BloomLevel;
+      graph?: QuestionGraph | null;
     };
 
 export function fetchQuestionBanks(): Promise<{ mine: QuestionBankSummary[]; public: QuestionBankSummary[] }> {
@@ -305,6 +317,7 @@ export interface ExamQuestion {
   content: string;
   type: QuestionType;
   alternatives: ExamAlternative[];
+  graph: QuestionGraph | null;
 }
 
 export type ExamState =
@@ -404,6 +417,7 @@ export interface GradingQuestion {
   maxPoints: number;
   alternatives: GradingAlternative[];
   answer: GradingAnswer | null;
+  graph: QuestionGraph | null;
 }
 
 export interface SubmissionDetail {

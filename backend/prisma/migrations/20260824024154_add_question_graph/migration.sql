@@ -1,0 +1,6 @@
+-- AlterTable
+ALTER TABLE "Question" ADD COLUMN     "graphExpression" TEXT,
+ADD COLUMN     "graphXMax" DOUBLE PRECISION,
+ADD COLUMN     "graphXMin" DOUBLE PRECISION,
+ADD COLUMN     "graphYMax" DOUBLE PRECISION,
+ADD COLUMN     "graphYMin" DOUBLE PRECISION;

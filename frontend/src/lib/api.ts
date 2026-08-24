@@ -311,6 +311,29 @@ export function deleteAssessment(assessmentId: string): Promise<void> {
   return authFetch(`/assessments/${assessmentId}`, { method: "DELETE" });
 }
 
+/** Baixa o PDF da prova e dispara o download no navegador. */
+export async function downloadAssessmentPdf(assessmentId: string, title: string): Promise<void> {
+  const token = getToken();
+  const res = await fetch(`${API_URL}/assessments/${assessmentId}/pdf`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new ApiError(body.error ?? `Erro ${res.status}`, res.status);
+  }
+
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `${title || "prova"}.pdf`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
 export interface ExamAlternative {
   id: string;
   content: string;

@@ -6,6 +6,7 @@ import { requireAuth, requireRole, type AuthedRequest } from "../lib/authMiddlew
 import { classroomForRequest } from "../lib/google.js";
 import { distributeAssessment } from "../lib/distributeAssessment.js";
 import { publishGradeForSubmission, publishGradesForAssessment } from "../lib/publishGrades.js";
+import { generateAssessmentPdf } from "../lib/generateAssessmentPdf.js";
 
 export const assessmentsRouter = Router();
 assessmentsRouter.use(requireAuth, requireRole("TEACHER", "ADMIN"));
@@ -129,6 +130,46 @@ async function loadOwnedAssessment(assessmentId: string, teacherId: string) {
   }
   return assessment;
 }
+
+/** Gera o PDF da prova (questões formatadas + marca d'água) para impressão. */
+assessmentsRouter.get("/:assessmentId/pdf", async (req: AuthedRequest, res, next) => {
+  try {
+    const assessment = await loadOwnedAssessment(req.params.assessmentId, req.userId!);
+    const teacher = await prisma.user.findUnique({ where: { id: req.userId! } });
+
+    const assessmentQuestions = await prisma.assessmentQuestion.findMany({
+      where: { assessmentId: assessment.id },
+      include: { question: { include: { alternatives: true } } },
+      orderBy: { order: "asc" },
+    });
+
+    const filenameSlug = assessment.title
+      .normalize("NFD")
+      .replace(/[̀-ͯ]/g, "")
+      .replace(/[^a-zA-Z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .toLowerCase();
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="${filenameSlug || "prova"}.pdf"`);
+
+    const doc = generateAssessmentPdf({
+      title: assessment.title,
+      teacherName: teacher?.name ?? "",
+      className: assessment.class.name,
+      questions: assessmentQuestions.map((aq) => ({
+        content: aq.question.content,
+        type: aq.question.type,
+        points: aq.points,
+        alternatives: aq.question.alternatives,
+        requiresSketch: aq.question.requiresSketch,
+      })),
+    });
+    doc.pipe(res);
+  } catch (err) {
+    next(err);
+  }
+});
 
 /** Lista as entregas da avaliação (matriculados sem entrega aparecem como not_started). */
 assessmentsRouter.get("/:assessmentId/submissions", async (req: AuthedRequest, res, next) => {

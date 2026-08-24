@@ -2,11 +2,18 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppShell } from "../components/layout/AppShell";
 import { GlassCard } from "../components/dashboard/GlassCard";
-import { PlusIcon, TrashIcon } from "../components/ui/dashboardIcons";
+import { DownloadIcon, PlusIcon, TrashIcon } from "../components/ui/dashboardIcons";
 import { CreateAssessmentModal } from "../components/assessments/CreateAssessmentModal";
 import { ConfirmModal } from "../components/grading/ConfirmModal";
 import { useGsapEntrance } from "../hooks/useGsapEntrance";
-import { ApiError, deleteAssessment, fetchAssessments, type AssessmentSummary, type AssessmentStatus } from "../lib/api";
+import {
+  ApiError,
+  deleteAssessment,
+  downloadAssessmentPdf,
+  fetchAssessments,
+  type AssessmentSummary,
+  type AssessmentStatus,
+} from "../lib/api";
 
 const STATUS_LABEL: Record<AssessmentStatus, string> = {
   DRAFT: "Rascunho",
@@ -29,6 +36,8 @@ export default function Assessments() {
   const [deleteTarget, setDeleteTarget] = useState<AssessmentSummary | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [downloadErrorId, setDownloadErrorId] = useState<string | null>(null);
 
   function load() {
     setStatus("loading");
@@ -59,6 +68,18 @@ export default function Assessments() {
       setDeleteError(err instanceof ApiError ? err.message : "Não foi possível excluir a avaliação.");
     } finally {
       setDeleting(false);
+    }
+  }
+
+  async function handleDownloadPdf(a: AssessmentSummary) {
+    setDownloadingId(a.id);
+    setDownloadErrorId(null);
+    try {
+      await downloadAssessmentPdf(a.id, a.title);
+    } catch {
+      setDownloadErrorId(a.id);
+    } finally {
+      setDownloadingId(null);
     }
   }
 
@@ -121,18 +142,35 @@ export default function Assessments() {
                   <p className="text-xs text-neutral-500">
                     {a.className} · {a.questionCount} questões · {a.durationMinutes} min
                   </p>
+                  {downloadErrorId === a.id && (
+                    <p className="mt-1 text-xs text-red-400">Não foi possível gerar o PDF. Tente novamente.</p>
+                  )}
                 </div>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setDeleteError(null);
-                    setDeleteTarget(a);
-                  }}
-                  className="shrink-0 rounded-full p-2 text-neutral-500 transition-colors hover:bg-red-500/10 hover:text-red-400"
-                  aria-label="Excluir avaliação"
-                >
-                  <TrashIcon className="h-4 w-4" />
-                </button>
+                <div className="flex shrink-0 items-center gap-1">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDownloadPdf(a);
+                    }}
+                    disabled={downloadingId === a.id}
+                    className="rounded-full p-2 text-neutral-500 transition-colors hover:bg-orange-500/10 hover:text-orange-400 disabled:cursor-wait disabled:opacity-50"
+                    aria-label="Baixar PDF da prova"
+                    title="Baixar PDF"
+                  >
+                    <DownloadIcon className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDeleteError(null);
+                      setDeleteTarget(a);
+                    }}
+                    className="rounded-full p-2 text-neutral-500 transition-colors hover:bg-red-500/10 hover:text-red-400"
+                    aria-label="Excluir avaliação"
+                  >
+                    <TrashIcon className="h-4 w-4" />
+                  </button>
+                </div>
               </GlassCard>
             ))}
           </div>

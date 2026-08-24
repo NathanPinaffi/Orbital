@@ -96,7 +96,7 @@ export function Topbar() {
               <div className="flex items-center justify-between border-b border-white/5 px-4 py-3">
                 <p className="text-sm text-white">Notificações</p>
                 {unreadCount > 0 && (
-                  <button onClick={handleMarkAllRead} className="text-xs text-orange-400 hover:text-orange-300">
+                  <button onClick={handleMarkAllRead} className="text-xs text-orange-400 hover:text-orange-300 z-index:200">
                     Marcar todas como lidas
                   </button>
                 )}

@@ -8,7 +8,6 @@ import {
   FileTextIcon,
   LayoutGridIcon,
   LogOutIcon,
-  SettingsIcon,
   UsersIcon,
   XIcon,
 } from "../ui/dashboardIcons";
@@ -24,13 +23,11 @@ const TEACHER_ITEMS: NavItem[] = [
   { label: "Avaliações", icon: FileTextIcon, to: "/avaliacoes" },
   { label: "Banco de questões", icon: BookOpenIcon, to: "/banco-de-questoes" },
   { label: "Turmas", icon: UsersIcon, to: "/turmas" },
-  { label: "Configurações", icon: SettingsIcon },
 ];
 
 const STUDENT_ITEMS: NavItem[] = [
   { label: "Visão geral", icon: LayoutGridIcon, to: "/dashboard" },
   { label: "Minhas turmas", icon: UsersIcon, to: "/minhas-turmas" },
-  { label: "Configurações", icon: SettingsIcon },
 ];
 
 const ROLE_LABEL: Record<string, string> = {

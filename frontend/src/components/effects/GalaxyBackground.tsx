@@ -174,6 +174,9 @@ export function GalaxyBackground({
         const px = cx + p.x * maxDim + current.x * p.depth * 46 + wobbleX;
         const py = cy + p.y * maxDim + current.y * p.depth * 46 + wobbleY;
 
+        ctx!.save();
+        ctx!.filter = `blur(${p.radius * 0.05}px)`;
+
         if (p.ringColor) {
           ctx!.save();
           ctx!.translate(px, py);
@@ -191,6 +194,8 @@ export function GalaxyBackground({
         ctx!.fillStyle = `rgba(${p.color},0.85)`;
         ctx!.arc(px, py, p.radius, 0, Math.PI * 2);
         ctx!.fill();
+
+        ctx!.restore();
       }
 
       framesUntilNextComet -= 1;

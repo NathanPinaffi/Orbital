@@ -11,14 +11,14 @@ const bloomLevelSchema = z.enum(["REMEMBER", "UNDERSTAND", "APPLY", "ANALYZE", "
 
 const graphSchema = z
   .object({
-    graphExpression: z.string().min(1),
-    graphXMin: z.number(),
-    graphXMax: z.number(),
-    graphYMin: z.number(),
-    graphYMax: z.number(),
+    expression: z.string().min(1),
+    xMin: z.number(),
+    xMax: z.number(),
+    yMin: z.number(),
+    yMax: z.number(),
   })
-  .refine((g) => g.graphXMax > g.graphXMin, { message: "O máximo de X deve ser maior que o mínimo" })
-  .refine((g) => g.graphYMax > g.graphYMin, { message: "O máximo de Y deve ser maior que o mínimo" });
+  .refine((g) => g.xMax > g.xMin, { message: "O máximo de X deve ser maior que o mínimo" })
+  .refine((g) => g.yMax > g.yMin, { message: "O máximo de Y deve ser maior que o mínimo" });
 
 const baseFields = {
   bankId: z.string().min(1),
@@ -146,11 +146,11 @@ questionsRouter.post("/", async (req: AuthedRequest, res, next) => {
         type: body.type,
         difficulty: body.difficulty,
         bloomLevel: body.bloomLevel,
-        graphExpression: body.graph?.graphExpression ?? null,
-        graphXMin: body.graph?.graphXMin ?? null,
-        graphXMax: body.graph?.graphXMax ?? null,
-        graphYMin: body.graph?.graphYMin ?? null,
-        graphYMax: body.graph?.graphYMax ?? null,
+        graphExpression: body.graph?.expression ?? null,
+        graphXMin: body.graph?.xMin ?? null,
+        graphXMax: body.graph?.xMax ?? null,
+        graphYMin: body.graph?.yMin ?? null,
+        graphYMax: body.graph?.yMax ?? null,
         requiresSketch: body.requiresSketch,
         alternatives: { create: alternativesForCreate(body) },
       },
@@ -195,11 +195,11 @@ questionsRouter.put("/:id", async (req: AuthedRequest, res, next) => {
           type: body.type,
           difficulty: body.difficulty,
           bloomLevel: body.bloomLevel,
-          graphExpression: body.graph?.graphExpression ?? null,
-          graphXMin: body.graph?.graphXMin ?? null,
-          graphXMax: body.graph?.graphXMax ?? null,
-          graphYMin: body.graph?.graphYMin ?? null,
-          graphYMax: body.graph?.graphYMax ?? null,
+          graphExpression: body.graph?.expression ?? null,
+          graphXMin: body.graph?.xMin ?? null,
+          graphXMax: body.graph?.xMax ?? null,
+          graphYMin: body.graph?.yMin ?? null,
+          graphYMax: body.graph?.yMax ?? null,
           requiresSketch: body.requiresSketch,
           alternatives: { create: alternativesForCreate(body) },
         },

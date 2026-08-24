@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppShell } from "../components/layout/AppShell";
 import { GlassCard } from "../components/dashboard/GlassCard";
-import { PlusIcon } from "../components/ui/dashboardIcons";
+import { PlusIcon, TrashIcon } from "../components/ui/dashboardIcons";
 import { CreateAssessmentModal } from "../components/assessments/CreateAssessmentModal";
+import { ConfirmModal } from "../components/grading/ConfirmModal";
 import { useGsapEntrance } from "../hooks/useGsapEntrance";
-import { fetchAssessments, type AssessmentSummary, type AssessmentStatus } from "../lib/api";
+import { ApiError, deleteAssessment, fetchAssessments, type AssessmentSummary, type AssessmentStatus } from "../lib/api";
 
 const STATUS_LABEL: Record<AssessmentStatus, string> = {
   DRAFT: "Rascunho",
@@ -25,6 +26,9 @@ export default function Assessments() {
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const [assessments, setAssessments] = useState<AssessmentSummary[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<AssessmentSummary | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   function load() {
     setStatus("loading");
@@ -41,6 +45,21 @@ export default function Assessments() {
   function handleCreated() {
     setModalOpen(false);
     load();
+  }
+
+  async function handleConfirmDelete() {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      await deleteAssessment(deleteTarget.id);
+      setDeleteTarget(null);
+      load();
+    } catch (err) {
+      setDeleteError(err instanceof ApiError ? err.message : "Não foi possível excluir a avaliação.");
+    } finally {
+      setDeleting(false);
+    }
   }
 
   return (
@@ -90,17 +109,30 @@ export default function Assessments() {
                 key={a.id}
                 data-animate
                 onClick={() => navigate(`/avaliacoes/${a.id}/submissions`)}
-                className="cursor-pointer p-5"
+                className="flex cursor-pointer items-center justify-between gap-3 p-5"
               >
-                <div className="mb-1 flex flex-wrap items-center gap-2">
-                  <p className="truncate text-sm text-white">{a.title}</p>
-                  <span className={`shrink-0 rounded-md px-1.5 py-0.5 text-[10px] uppercase ring-1 ${STATUS_STYLE[a.status]}`}>
-                    {STATUS_LABEL[a.status]}
-                  </span>
+                <div className="min-w-0">
+                  <div className="mb-1 flex flex-wrap items-center gap-2">
+                    <p className="truncate text-sm text-white">{a.title}</p>
+                    <span className={`shrink-0 rounded-md px-1.5 py-0.5 text-[10px] uppercase ring-1 ${STATUS_STYLE[a.status]}`}>
+                      {STATUS_LABEL[a.status]}
+                    </span>
+                  </div>
+                  <p className="text-xs text-neutral-500">
+                    {a.className} · {a.questionCount} questões · {a.durationMinutes} min
+                  </p>
                 </div>
-                <p className="text-xs text-neutral-500">
-                  {a.className} · {a.questionCount} questões · {a.durationMinutes} min
-                </p>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDeleteError(null);
+                    setDeleteTarget(a);
+                  }}
+                  className="shrink-0 rounded-full p-2 text-neutral-500 transition-colors hover:bg-red-500/10 hover:text-red-400"
+                  aria-label="Excluir avaliação"
+                >
+                  <TrashIcon className="h-4 w-4" />
+                </button>
               </GlassCard>
             ))}
           </div>
@@ -108,6 +140,21 @@ export default function Assessments() {
       </div>
 
       {modalOpen && <CreateAssessmentModal onClose={() => setModalOpen(false)} onCreated={handleCreated} />}
+
+      {deleteTarget && (
+        <ConfirmModal
+          title="Excluir avaliação"
+          description={
+            deleteError ??
+            `Isso vai excluir permanentemente "${deleteTarget.title}", todas as entregas dos alunos e a atividade correspondente no Google Sala de Aula. Essa ação não pode ser desfeita.`
+          }
+          confirmLabel="Excluir"
+          danger
+          busy={deleting}
+          onCancel={() => setDeleteTarget(null)}
+          onConfirm={handleConfirmDelete}
+        />
+      )}
     </AppShell>
   );
 }

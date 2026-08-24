@@ -291,6 +291,10 @@ export function createAssessment(input: CreateAssessmentInput): Promise<CreatedA
   return authFetch("/assessments", { method: "POST", body: JSON.stringify(input) });
 }
 
+export function deleteAssessment(assessmentId: string): Promise<void> {
+  return authFetch(`/assessments/${assessmentId}`, { method: "DELETE" });
+}
+
 export interface ExamAlternative {
   id: string;
   content: string;

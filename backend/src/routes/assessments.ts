@@ -358,6 +358,35 @@ assessmentsRouter.post("/:assessmentId/void-all", async (req: AuthedRequest, res
   }
 });
 
+/** Exclui permanentemente a avaliação, suas entregas e a atividade correspondente no Google Sala de Aula. */
+assessmentsRouter.delete("/:assessmentId", async (req: AuthedRequest, res, next) => {
+  try {
+    const assessment = await loadOwnedAssessment(req.params.assessmentId, req.userId!);
+
+    if (assessment.googleCourseWorkId && assessment.class.googleClassroomId) {
+      try {
+        const { classroom } = await classroomForRequest(req);
+        await classroom.courses.courseWork.delete({
+          courseId: assessment.class.googleClassroomId,
+          id: assessment.googleCourseWorkId,
+        });
+      } catch {
+        // Segue com a exclusão local mesmo se a atividade já tiver sido removida do Classroom ou o acesso tiver expirado.
+      }
+    }
+
+    await prisma.$transaction(async (tx) => {
+      await tx.notification.updateMany({ where: { assessmentId: assessment.id }, data: { assessmentId: null } });
+      await tx.submission.deleteMany({ where: { assessmentId: assessment.id } });
+      await tx.assessment.delete({ where: { id: assessment.id } });
+    });
+
+    res.status(204).send();
+  } catch (err) {
+    next(err);
+  }
+});
+
 /** Publica a nota de um aluno específico no Google Sala de Aula. */
 assessmentsRouter.post(
   "/:assessmentId/submissions/:submissionId/publish-grade",

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ClockIcon } from "../ui/dashboardIcons";
+import { MathText } from "../common/MathText";
 import { RestScreen } from "./RestScreen";
 import type { ExamQuestion } from "../../lib/api";
 
@@ -180,7 +181,9 @@ export function ExamRunner({
               <span className="text-[10px] uppercase text-neutral-500">{TYPE_LABEL[q.type]}</span>
             </div>
 
-            <p className="mb-5 text-sm leading-relaxed text-white">{q.content}</p>
+            <p className="mb-5 text-sm leading-relaxed text-white">
+              <MathText text={q.content} />
+            </p>
 
             {q.type === "ESSAY" ? (
               <textarea
@@ -207,7 +210,7 @@ export function ExamRunner({
                       onChange={() => setAnswer(q.id, alt.id)}
                       className="h-4 w-4 border-white/20 bg-transparent accent-orange-500 text-orange-500 focus:ring-0"
                     />
-                    {alt.content}
+                    <MathText text={alt.content} />
                   </label>
                 ))}
               </div>

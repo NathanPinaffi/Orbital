@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { PlusIcon, TrashIcon, XIcon } from "../ui/dashboardIcons";
+import { MathText } from "../common/MathText";
 import type { BloomLevel, Difficulty, Question, QuestionInput, QuestionType } from "../../lib/api";
 
 const DIFFICULTY_LABEL: Record<Difficulty, string> = {
@@ -220,9 +221,18 @@ export function QuestionFormModal({
                 className={`${inputClass} min-h-24 resize-y`}
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                placeholder="Digite o enunciado da questão..."
+                placeholder="Digite o enunciado da questão... Use $ x^2 $ para fórmulas em linha ou $$ x^2 $$ para fórmulas em bloco."
                 required
               />
+              <p className="mt-1 text-[11px] text-neutral-600">
+                Use LaTeX entre <code className="text-neutral-500">$...$</code> (em linha) ou{" "}
+                <code className="text-neutral-500">$$...$$</code> (em bloco) para escrever fórmulas matemáticas.
+              </p>
+              {content.includes("$") && (
+                <div className="mt-2 rounded-lg border border-white/10 bg-white/[0.02] px-3 py-2 text-sm text-neutral-200">
+                  <MathText text={content} />
+                </div>
+              )}
             </Field>
 
             {type === "MULTIPLE_CHOICE" && (
@@ -238,12 +248,19 @@ export function QuestionFormModal({
                         onChange={() => updateAlternative(i, { isCorrect: true })}
                         className="h-4 w-4 shrink-0 border-white/20 bg-transparent accent-orange-500 text-orange-500 focus:ring-0"
                       />
-                      <input
-                        className={inputClass}
-                        value={alt.content}
-                        onChange={(e) => updateAlternative(i, { content: e.target.value })}
-                        placeholder={`Alternativa ${i + 1}`}
-                      />
+                      <div className="min-w-0 flex-1">
+                        <input
+                          className={inputClass}
+                          value={alt.content}
+                          onChange={(e) => updateAlternative(i, { content: e.target.value })}
+                          placeholder={`Alternativa ${i + 1}`}
+                        />
+                        {alt.content.includes("$") && (
+                          <p className="mt-1 text-xs text-neutral-400">
+                            <MathText text={alt.content} />
+                          </p>
+                        )}
+                      </div>
                       {alternatives.length > 2 && (
                         <button
                           type="button"

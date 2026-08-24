@@ -5,6 +5,7 @@ import { Topbar } from "../components/dashboard/Topbar";
 import { GlassCard } from "../components/dashboard/GlassCard";
 import { ConfirmModal } from "../components/grading/ConfirmModal";
 import { EssayGrader } from "../components/grading/EssayGrader";
+import { MathText } from "../components/common/MathText";
 import { useGsapEntrance } from "../hooks/useGsapEntrance";
 import { initials } from "../hooks/useMe";
 import {
@@ -151,7 +152,9 @@ export default function GradeSubmission() {
               {data.questions.map((q, i) => (
                 <GlassCard key={q.questionId} className="p-5">
                   <p className="mb-2 text-xs text-neutral-500">Questão {i + 1} · {q.maxPoints} pt(s)</p>
-                  <p className="mb-3 text-sm text-white">{q.content}</p>
+                  <p className="mb-3 text-sm text-white">
+                    <MathText text={q.content} />
+                  </p>
 
                   {q.type === "ESSAY" ? (
                     <EssayGrader question={q} onSave={(points, comment) => handleGrade(q.questionId, q.answer!.id, points, comment)} />
@@ -170,7 +173,8 @@ export default function GradeSubmission() {
                                   : "bg-white/[0.02] text-neutral-400 ring-white/5"
                             }`}
                           >
-                            {alt.content} {chosen && <span className="text-[10px] uppercase opacity-70">(resposta do aluno)</span>}
+                            <MathText text={alt.content} />{" "}
+                            {chosen && <span className="text-[10px] uppercase opacity-70">(resposta do aluno)</span>}
                           </div>
                         );
                       })}

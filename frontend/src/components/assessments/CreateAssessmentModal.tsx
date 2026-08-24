@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { XIcon } from "../ui/dashboardIcons";
+import { MathText } from "../common/MathText";
 import {
   createAssessment,
   fetchClasses,
@@ -286,7 +287,7 @@ export function CreateAssessmentModal({
                           className="mt-0.5 h-3.5 w-3.5 shrink-0 rounded border-white/20 bg-transparent accent-orange-500 text-orange-500 focus:ring-0"
                         />
                         <span className="line-clamp-1">
-                          {q.content}{" "}
+                          <MathText text={q.content} />{" "}
                           <span className="text-neutral-600">
                             ({q.subject} · {q.topic} · {q.bank.name})
                           </span>

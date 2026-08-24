@@ -56,7 +56,7 @@ export default function Classrooms() {
             <button
               onClick={runSync}
               disabled={syncState === "syncing"}
-              className="shrink-0 self-start rounded-full bg-white/[0.06] px-4 py-2 text-xs font-medium text-white ring-1 ring-white/10 transition hover:bg-white/[0.1] disabled:cursor-not-allowed disabled:opacity-50 sm:self-auto"
+              className="shrink-0 self-start rounded-full bg-orange-500/10 px-4 py-2 text-xs font-medium text-orange-400 ring-1 ring-orange-500/20 transition hover:bg-orange-500/20 disabled:cursor-not-allowed disabled:opacity-50 sm:self-auto"
             >
               {syncState === "syncing" ? "Sincronizando…" : "Sincronizar novamente"}
             </button>
@@ -151,7 +151,7 @@ export default function Classrooms() {
                       </span>
                       <Link
                         to={`/turmas/${imported.id}/ranking`}
-                        className="rounded-full bg-white/[0.06] px-3 py-1.5 text-xs font-medium text-white ring-1 ring-white/10 transition hover:bg-white/[0.1]"
+                        className="rounded-full bg-orange-500/10 px-3 py-1.5 text-xs font-medium text-orange-400 ring-1 ring-orange-500/20 transition hover:bg-orange-500/20"
                       >
                         Ver ranking
                       </Link>

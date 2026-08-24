@@ -171,7 +171,7 @@ export function CreateAssessmentModal({
                           type="checkbox"
                           checked={selectedClassIds.has(c.id)}
                           onChange={() => toggleClass(c.id)}
-                          className="h-3.5 w-3.5 shrink-0 rounded border-white/20 bg-transparent text-orange-500 focus:ring-0"
+                          className="h-3.5 w-3.5 shrink-0 rounded border-white/20 bg-transparent accent-orange-500 text-orange-500 focus:ring-0"
                         />
                         <span className="truncate">
                           {c.name} · {c.studentCount} alunos
@@ -228,7 +228,7 @@ export function CreateAssessmentModal({
                           type="checkbox"
                           checked={selectedQuestionIds.has(q.id)}
                           onChange={() => toggleQuestion(q.id)}
-                          className="mt-0.5 h-3.5 w-3.5 shrink-0 rounded border-white/20 bg-transparent text-orange-500 focus:ring-0"
+                          className="mt-0.5 h-3.5 w-3.5 shrink-0 rounded border-white/20 bg-transparent accent-orange-500 text-orange-500 focus:ring-0"
                         />
                         <span className="line-clamp-1">
                           {q.content}{" "}

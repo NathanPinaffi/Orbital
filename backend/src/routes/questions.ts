@@ -178,6 +178,13 @@ questionsRouter.delete("/:id", async (req: AuthedRequest, res, next) => {
       return res.status(404).json({ error: "Questão não encontrada" });
     }
 
+    const usageCount = await prisma.assessmentQuestion.count({ where: { questionId: existing.id } });
+    if (usageCount > 0) {
+      return res.status(409).json({
+        error: "Esta questão está sendo usada em uma ou mais avaliações e não pode ser excluída. Remova-a das avaliações antes de excluir.",
+      });
+    }
+
     await prisma.question.delete({ where: { id: existing.id } });
     res.status(204).send();
   } catch (err) {

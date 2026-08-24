@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { BellIcon, SearchIcon } from "../ui/dashboardIcons";
 import {
   fetchNotifications,
@@ -9,12 +10,15 @@ import {
 import { timeAgo } from "../../lib/time";
 
 const POLL_INTERVAL_MS = 60_000;
+const DROPDOWN_WIDTH = 320;
 
 export function Topbar() {
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [dropdownPos, setDropdownPos] = useState<{ top: number; left: number } | null>(null);
+  const bellRef = useRef<HTMLButtonElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   function load() {
     fetchNotifications()
@@ -31,15 +35,34 @@ export function Topbar() {
     return () => clearInterval(interval);
   }, []);
 
+  function toggleOpen() {
+    if (!open && bellRef.current) {
+      const rect = bellRef.current.getBoundingClientRect();
+      const left = Math.min(rect.right - DROPDOWN_WIDTH, window.innerWidth - DROPDOWN_WIDTH - 16);
+      setDropdownPos({ top: rect.bottom + 8, left: Math.max(16, left) });
+    }
+    setOpen((o) => !o);
+  }
+
   useEffect(() => {
+    if (!open) return;
     function handleClickOutside(e: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
+      const target = e.target as Node;
+      if (bellRef.current?.contains(target) || dropdownRef.current?.contains(target)) return;
+      setOpen(false);
+    }
+    function handleScrollOrResize() {
+      setOpen(false);
     }
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+    window.addEventListener("scroll", handleScrollOrResize, true);
+    window.addEventListener("resize", handleScrollOrResize);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("scroll", handleScrollOrResize, true);
+      window.removeEventListener("resize", handleScrollOrResize);
+    };
+  }, [open]);
 
   async function handleOpenNotification(n: NotificationItem) {
     if (!n.readAt) {
@@ -79,24 +102,28 @@ export function Topbar() {
           />
         </div>
 
-        <div ref={containerRef} className="relative shrink-0">
-          <button
-            onClick={() => setOpen((o) => !o)}
-            className="relative shrink-0 rounded-full border border-white/10 bg-white/5 p-2.5 text-neutral-300 transition-colors hover:bg-orange-500/20 hover:text-orange-400"
-            aria-label="Notificações"
-          >
-            <BellIcon className="h-4 w-4" />
-            {unreadCount > 0 && (
-              <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-orange-500" />
-            )}
-          </button>
+        <button
+          ref={bellRef}
+          onClick={toggleOpen}
+          className="relative shrink-0 rounded-full border border-white/10 bg-white/5 p-2.5 text-neutral-300 transition-colors hover:bg-orange-500/20 hover:text-orange-400"
+          aria-label="Notificações"
+        >
+          <BellIcon className="h-4 w-4" />
+          {unreadCount > 0 && <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-orange-500" />}
+        </button>
 
-          {open && (
-            <div className="absolute right-0 z-50 mt-2 w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-white/10 bg-[#0A0A0A] shadow-2xl">
+        {open &&
+          dropdownPos &&
+          createPortal(
+            <div
+              ref={dropdownRef}
+              style={{ top: dropdownPos.top, left: dropdownPos.left, width: DROPDOWN_WIDTH }}
+              className="fixed z-[1000] max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-white/10 bg-[#0A0A0A] shadow-2xl"
+            >
               <div className="flex items-center justify-between border-b border-white/5 px-4 py-3">
                 <p className="text-sm text-white">Notificações</p>
                 {unreadCount > 0 && (
-                  <button onClick={handleMarkAllRead} className="text-xs text-orange-400 hover:text-orange-300 z-index:200">
+                  <button onClick={handleMarkAllRead} className="text-xs text-orange-400 hover:text-orange-300">
                     Marcar todas como lidas
                   </button>
                 )}
@@ -126,9 +153,9 @@ export function Topbar() {
                   ))
                 )}
               </div>
-            </div>
+            </div>,
+            document.body,
           )}
-        </div>
       </div>
     </header>
   );

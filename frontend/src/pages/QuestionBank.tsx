@@ -6,6 +6,7 @@ import { QuestionFormModal } from "../components/questions/QuestionFormModal";
 import { CreateBankModal } from "../components/questions/CreateBankModal";
 import { useGsapEntrance } from "../hooks/useGsapEntrance";
 import {
+  ApiError,
   createQuestion,
   createQuestionBank,
   deleteQuestion,
@@ -154,9 +155,13 @@ export default function QuestionBank() {
 
   async function handleDelete(question: Question) {
     if (!window.confirm(`Excluir a questão "${question.content.slice(0, 60)}..."?`)) return;
-    await deleteQuestion(question.id);
-    loadQuestions();
-    loadBanks();
+    try {
+      await deleteQuestion(question.id);
+      loadQuestions();
+      loadBanks();
+    } catch (err) {
+      window.alert(err instanceof ApiError ? err.message : "Não foi possível excluir a questão.");
+    }
   }
 
   async function handleCreateBank(input: { name: string; visibility: BankVisibility }) {

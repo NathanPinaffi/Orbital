@@ -98,7 +98,7 @@ export default function AssessmentSubmissions() {
                 onClick={() => setConfirm("publish-all")}
                 disabled={!data?.assessment.googleCourseWorkId}
                 title={!data?.assessment.googleCourseWorkId ? "Esta avaliação foi distribuída antes do suporte a publicação de notas" : undefined}
-                className="rounded-full bg-white/[0.06] px-4 py-2 text-xs font-medium text-white ring-1 ring-white/10 transition hover:bg-white/[0.1] disabled:cursor-not-allowed disabled:opacity-40"
+                className="rounded-full bg-orange-500/10 px-4 py-2 text-xs font-medium text-orange-400 ring-1 ring-orange-500/20 transition hover:bg-orange-500/20 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Publicar todas as notas
               </button>

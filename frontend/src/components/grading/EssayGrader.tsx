@@ -61,7 +61,7 @@ export function EssayGrader({
         <button
           onClick={handleSave}
           disabled={invalid || saving}
-          className="rounded-full bg-white/[0.06] px-4 py-2 text-xs font-medium text-white ring-1 ring-white/10 transition hover:bg-white/[0.1] disabled:cursor-not-allowed disabled:opacity-40"
+          className="rounded-full bg-orange-500/10 px-4 py-2 text-xs font-medium text-orange-400 ring-1 ring-orange-500/20 transition hover:bg-orange-500/20 disabled:cursor-not-allowed disabled:opacity-40"
         >
           {saving ? "Salvando…" : answer?.gradedAt ? "Atualizar" : "Salvar correção"}
         </button>

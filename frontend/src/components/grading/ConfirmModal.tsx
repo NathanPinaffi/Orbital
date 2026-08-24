@@ -34,7 +34,7 @@ export function ConfirmModal({
             className={`rounded-full px-4 py-2 text-xs font-medium ring-1 transition disabled:opacity-50 ${
               danger || confirmLabel.toLowerCase().includes("anular")
                 ? "bg-red-500/10 text-red-400 ring-red-500/20 hover:bg-red-500/20"
-                : "bg-white/[0.06] text-white ring-white/10 hover:bg-white/[0.1]"
+                : "bg-orange-500/10 text-orange-400 ring-orange-500/20 hover:bg-orange-500/20"
             }`}
           >
             {busy ? "Aguarde…" : confirmLabel}

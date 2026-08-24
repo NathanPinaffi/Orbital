@@ -63,7 +63,7 @@ export function CreateBankModal({
                     name="visibility"
                     checked={visibility === "PRIVATE"}
                     onChange={() => setVisibility("PRIVATE")}
-                    className="h-4 w-4 border-white/20 bg-transparent text-orange-500 focus:ring-0"
+                    className="h-4 w-4 border-white/20 bg-transparent accent-orange-500 text-orange-500 focus:ring-0"
                   />
                   Privado
                 </label>
@@ -73,7 +73,7 @@ export function CreateBankModal({
                     name="visibility"
                     checked={visibility === "PUBLIC"}
                     onChange={() => setVisibility("PUBLIC")}
-                    className="h-4 w-4 border-white/20 bg-transparent text-orange-500 focus:ring-0"
+                    className="h-4 w-4 border-white/20 bg-transparent accent-orange-500 text-orange-500 focus:ring-0"
                   />
                   Público
                 </label>

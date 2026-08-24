@@ -150,7 +150,7 @@ export function ExamRunner({
                       name={q.id}
                       checked={answers[q.id] === alt.id}
                       onChange={() => setAnswer(q.id, alt.id)}
-                      className="h-4 w-4 border-white/20 bg-transparent text-orange-500 focus:ring-0"
+                      className="h-4 w-4 border-white/20 bg-transparent accent-orange-500 text-orange-500 focus:ring-0"
                     />
                     {alt.content}
                   </label>

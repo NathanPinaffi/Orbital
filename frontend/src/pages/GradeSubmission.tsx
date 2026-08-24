@@ -128,7 +128,7 @@ export default function GradeSubmission() {
               <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => setConfirm("publish")}
-                  className="rounded-full bg-white/[0.06] px-4 py-2 text-xs font-medium text-white ring-1 ring-white/10 transition hover:bg-white/[0.1]"
+                  className="rounded-full bg-orange-500/10 px-4 py-2 text-xs font-medium text-orange-400 ring-1 ring-orange-500/20 transition hover:bg-orange-500/20"
                 >
                   Publicar nota
                 </button>

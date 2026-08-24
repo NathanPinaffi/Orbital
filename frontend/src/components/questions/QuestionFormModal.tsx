@@ -236,7 +236,7 @@ export function QuestionFormModal({
                         name="correct-alternative"
                         checked={alt.isCorrect}
                         onChange={() => updateAlternative(i, { isCorrect: true })}
-                        className="h-4 w-4 shrink-0 border-white/20 bg-transparent text-orange-500 focus:ring-0"
+                        className="h-4 w-4 shrink-0 border-white/20 bg-transparent accent-orange-500 text-orange-500 focus:ring-0"
                       />
                       <input
                         className={inputClass}
@@ -277,7 +277,7 @@ export function QuestionFormModal({
                       name="true-false"
                       checked={correctAnswer === true}
                       onChange={() => setCorrectAnswer(true)}
-                      className="h-4 w-4 border-white/20 bg-transparent text-orange-500 focus:ring-0"
+                      className="h-4 w-4 border-white/20 bg-transparent accent-orange-500 text-orange-500 focus:ring-0"
                     />
                     Verdadeiro
                   </label>
@@ -287,7 +287,7 @@ export function QuestionFormModal({
                       name="true-false"
                       checked={correctAnswer === false}
                       onChange={() => setCorrectAnswer(false)}
-                      className="h-4 w-4 border-white/20 bg-transparent text-orange-500 focus:ring-0"
+                      className="h-4 w-4 border-white/20 bg-transparent accent-orange-500 text-orange-500 focus:ring-0"
                     />
                     Falso
                   </label>

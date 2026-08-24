@@ -21,12 +21,19 @@ function toSvgY(y: number, yMin: number, yMax: number) {
   return HEIGHT - PADDING - ((y - yMin) / (yMax - yMin)) * (HEIGHT - 2 * PADDING);
 }
 
+/**
+ * Samples the curve across the x range and splits it into separate path segments
+ * wherever the function is undefined (e.g. sqrt of a negative number, division by zero).
+ * Values outside the visible Y range are still plotted (unclamped) — the caller clips
+ * them with an SVG clipPath so the curve reaches the plot edges cleanly instead of
+ * vanishing whenever it briefly leaves the window.
+ */
 function buildPaths(expression: string, xMin: number, xMax: number, yMin: number, yMax: number) {
   const paths: string[] = [];
   try {
     const fn = compile(expression);
     const samples = 400;
-    let current: string | null = null;
+    let current: string[] = [];
 
     for (let i = 0; i <= samples; i++) {
       const x = xMin + ((xMax - xMin) * i) / samples;
@@ -38,22 +45,17 @@ function buildPaths(expression: string, xMin: number, xMax: number, yMin: number
         y = NaN;
       }
 
-      const valid = Number.isFinite(y) && y >= yMin - (yMax - yMin) * 2 && y <= yMax + (yMax - yMin) * 2;
-      const svgX = toSvgX(x, xMin, xMax);
-      const svgY = toSvgY(Math.min(Math.max(y, yMin - (yMax - yMin)), yMax + (yMax - yMin)), yMin, yMax);
-
-      if (!valid) {
-        current = null;
+      if (!Number.isFinite(y)) {
+        if (current.length > 1) paths.push(current.join(" "));
+        current = [];
         continue;
       }
-      if (current === null) {
-        current = `M ${svgX.toFixed(2)} ${svgY.toFixed(2)}`;
-      } else {
-        current += ` L ${svgX.toFixed(2)} ${svgY.toFixed(2)}`;
-      }
-      if (i === samples && current) paths.push(current);
+
+      const svgX = toSvgX(x, xMin, xMax);
+      const svgY = toSvgY(y, yMin, yMax);
+      current.push(`${current.length === 0 ? "M" : "L"} ${svgX.toFixed(2)} ${svgY.toFixed(2)}`);
     }
-    if (current && !paths.includes(current)) paths.push(current);
+    if (current.length > 1) paths.push(current.join(" "));
   } catch {
     return { paths: [], error: true };
   }
@@ -62,6 +64,7 @@ function buildPaths(expression: string, xMin: number, xMax: number, yMin: number
 
 export function FunctionGraph({ spec, className }: { spec: GraphSpec; className?: string }) {
   const { expression, xMin, xMax, yMin, yMax } = spec;
+  const clipId = useMemo(() => `graph-clip-${Math.random().toString(36).slice(2)}`, []);
 
   const { paths, error } = useMemo(
     () => buildPaths(expression, xMin, xMax, yMin, yMax),
@@ -82,6 +85,12 @@ export function FunctionGraph({ spec, className }: { spec: GraphSpec; className?
   return (
     <div className={`rounded-lg border border-white/10 bg-white/[0.02] p-2 ${className ?? ""}`}>
       <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className="w-full" role="img" aria-label={`Gráfico de ${expression}`}>
+        <defs>
+          <clipPath id={clipId}>
+            <rect x={PADDING} y={PADDING} width={WIDTH - 2 * PADDING} height={HEIGHT - 2 * PADDING} />
+          </clipPath>
+        </defs>
+
         <rect x={0} y={0} width={WIDTH} height={HEIGHT} fill="transparent" />
 
         {showXAxis && (
@@ -105,6 +114,12 @@ export function FunctionGraph({ spec, className }: { spec: GraphSpec; className?
           />
         )}
 
+        <g clipPath={`url(#${clipId})`}>
+          {paths.map((d, i) => (
+            <path key={i} d={d} fill="none" stroke="#fb923c" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+          ))}
+        </g>
+
         <rect
           x={PADDING}
           y={PADDING}
@@ -114,10 +129,6 @@ export function FunctionGraph({ spec, className }: { spec: GraphSpec; className?
           stroke="rgba(255,255,255,0.08)"
           strokeWidth={1}
         />
-
-        {paths.map((d, i) => (
-          <path key={i} d={d} fill="none" stroke="#fb923c" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-        ))}
 
         <text x={PADDING} y={HEIGHT - 8} fontSize={9} fill="rgba(255,255,255,0.4)">
           {xMin}

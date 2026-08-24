@@ -128,15 +128,8 @@ export function generateAssessmentPdf({
         doc.y = drawRichText(doc, alt.content, MARGIN + 20 + labelWidth, altTop, usableWidth - 20 - labelWidth, 11, "Times-Roman");
       });
     } else {
-      const lineCount = question.requiresSketch ? 2 : 5;
-      for (let i = 0; i < lineCount; i++) {
-        doc.moveDown(1.1);
-        doc
-          .moveTo(doc.x, doc.y)
-          .lineTo(doc.page.width - doc.page.margins.right, doc.y)
-          .strokeColor("#aaaaaa")
-          .stroke();
-      }
+      const spaceLines = question.requiresSketch ? 2 : 5;
+      doc.moveDown(spaceLines * 1.1);
 
       if (question.requiresSketch) {
         doc.moveDown(0.8);

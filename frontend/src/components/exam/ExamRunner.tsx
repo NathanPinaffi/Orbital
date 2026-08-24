@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ClockIcon } from "../ui/dashboardIcons";
+import { RestScreen } from "./RestScreen";
 import type { ExamQuestion } from "../../lib/api";
 
 function formatTime(totalSeconds: number) {
@@ -22,32 +23,91 @@ export function ExamRunner({
   title,
   questions,
   initialRemainingSeconds,
+  onBreakNow,
+  secondsUntilBreak,
+  breakDurationSeconds,
   onSubmit,
 }: {
   title: string;
   questions: ExamQuestion[];
   initialRemainingSeconds: number;
+  onBreakNow: boolean;
+  secondsUntilBreak: number | null;
+  breakDurationSeconds: number | null;
   onSubmit: (answers: Record<string, string>) => void;
 }) {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [remaining, setRemaining] = useState(initialRemainingSeconds);
-  const deadlineRef = useRef(Date.now() + initialRemainingSeconds * 1000);
+  const [phase, setPhase] = useState<"answering" | "break">(onBreakNow ? "break" : "answering");
+  const [breakRemaining, setBreakRemaining] = useState(onBreakNow ? (breakDurationSeconds ?? 0) : (breakDurationSeconds ?? 0));
   const submittedRef = useRef(false);
   const questionRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
+  const examDeadlineRef = useRef<number | null>(null);
+  const breakStartAtRef = useRef<number | null>(null);
+  const breakDeadlineRef = useRef<number | null>(null);
+  const pendingExamSecondsRef = useRef<number | null>(null);
+  const breakTotalSecondsRef = useRef(breakDurationSeconds ?? 0);
+
+  useEffect(() => {
+    const now = Date.now();
+    if (onBreakNow) {
+      breakDeadlineRef.current = now + (breakDurationSeconds ?? 0) * 1000;
+      pendingExamSecondsRef.current = initialRemainingSeconds;
+    } else if (secondsUntilBreak != null && breakDurationSeconds != null) {
+      breakStartAtRef.current = now + secondsUntilBreak * 1000;
+      examDeadlineRef.current = now + initialRemainingSeconds * 1000;
+    } else {
+      examDeadlineRef.current = now + initialRemainingSeconds * 1000;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     const interval = setInterval(() => {
-      const secondsLeft = Math.max(0, Math.round((deadlineRef.current - Date.now()) / 1000));
-      setRemaining(secondsLeft);
-      if (secondsLeft === 0 && !submittedRef.current) {
-        submittedRef.current = true;
-        clearInterval(interval);
-        onSubmit(answers);
+      const now = Date.now();
+
+      if (breakStartAtRef.current != null && now >= breakStartAtRef.current) {
+        pendingExamSecondsRef.current = Math.max(0, Math.round((examDeadlineRef.current! - now) / 1000));
+        breakDeadlineRef.current = now + breakTotalSecondsRef.current * 1000;
+        breakStartAtRef.current = null;
+        setPhase("break");
+        return;
+      }
+
+      if (breakDeadlineRef.current != null) {
+        const breakLeft = Math.max(0, Math.round((breakDeadlineRef.current - now) / 1000));
+        setBreakRemaining(breakLeft);
+        if (breakLeft === 0) {
+          examDeadlineRef.current = now + (pendingExamSecondsRef.current ?? 0) * 1000;
+          breakDeadlineRef.current = null;
+          setPhase("answering");
+        }
+        return;
+      }
+
+      if (examDeadlineRef.current != null) {
+        const secondsLeft = Math.max(0, Math.round((examDeadlineRef.current - now) / 1000));
+        setRemaining(secondsLeft);
+        if (secondsLeft === 0 && !submittedRef.current) {
+          submittedRef.current = true;
+          clearInterval(interval);
+          onSubmit(answers);
+        }
       }
     }, 1000);
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const overviewItems = useMemo(
+    () => questions.map((q, i) => ({ id: q.id, index: i + 1, answered: Boolean(answers[q.id]) })),
+    [questions, answers],
+  );
+
+  if (phase === "break") {
+    return <RestScreen remainingSeconds={breakRemaining} totalSeconds={breakTotalSecondsRef.current} />;
+  }
 
   const answeredCount = Object.keys(answers).length;
   const urgent = remaining <= 60;
@@ -68,11 +128,6 @@ export function ExamRunner({
     submittedRef.current = true;
     onSubmit(answers);
   }
-
-  const overviewItems = useMemo(
-    () => questions.map((q, i) => ({ id: q.id, index: i + 1, answered: Boolean(answers[q.id]) })),
-    [questions, answers],
-  );
 
   return (
     <div className="space-y-4">

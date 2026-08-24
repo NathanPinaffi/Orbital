@@ -10,13 +10,28 @@ import { publishGradeForSubmission, publishGradesForAssessment } from "../lib/pu
 export const assessmentsRouter = Router();
 assessmentsRouter.use(requireAuth, requireRole("TEACHER", "ADMIN"));
 
-const createSchema = z.object({
-  title: z.string().min(1),
-  durationMinutes: z.number().int().positive(),
-  classIds: z.array(z.string()).min(1),
-  questionIds: z.array(z.string()).min(1),
-  dueAt: z.string().datetime().optional(),
-});
+const createSchema = z
+  .object({
+    title: z.string().min(1),
+    durationMinutes: z.number().int().positive(),
+    breakStartMinute: z.number().int().positive().optional(),
+    breakDurationMinutes: z.number().int().positive().optional(),
+    classIds: z.array(z.string()).min(1),
+    questionIds: z.array(z.string()).min(1),
+    dueAt: z.string().datetime().optional(),
+  })
+  .refine((data) => (data.breakStartMinute == null) === (data.breakDurationMinutes == null), {
+    message: "Informe o início e a duração da pausa juntos",
+    path: ["breakStartMinute"],
+  })
+  .refine((data) => data.breakStartMinute == null || data.durationMinutes > 60, {
+    message: "A pausa só pode ser adicionada em avaliações com mais de 1 hora",
+    path: ["breakStartMinute"],
+  })
+  .refine((data) => data.breakStartMinute == null || data.breakStartMinute < data.durationMinutes, {
+    message: "A pausa deve começar antes do fim da avaliação",
+    path: ["breakStartMinute"],
+  });
 
 /** Lista as avaliações criadas pelo professor autenticado, em qualquer turma sua. */
 assessmentsRouter.get("/", async (req: AuthedRequest, res, next) => {
@@ -53,7 +68,7 @@ assessmentsRouter.post("/", async (req: AuthedRequest, res, next) => {
     if (!parsed.success) {
       return res.status(400).json({ error: parsed.error.flatten() });
     }
-    const { title, durationMinutes, classIds, questionIds, dueAt } = parsed.data;
+    const { title, durationMinutes, breakStartMinute, breakDurationMinutes, classIds, questionIds, dueAt } = parsed.data;
 
     const classes = await prisma.classSection.findMany({
       where: { id: { in: classIds }, teacherId: req.userId! },
@@ -77,6 +92,8 @@ assessmentsRouter.post("/", async (req: AuthedRequest, res, next) => {
         data: {
           title,
           durationMinutes,
+          breakStartMinute,
+          breakDurationMinutes,
           classId: classSection.id,
           dueAt: dueAt ? new Date(dueAt) : undefined,
           questions: {

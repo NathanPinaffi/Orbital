@@ -26,6 +26,9 @@ export function CreateAssessmentModal({
 
   const [title, setTitle] = useState("");
   const [durationMinutes, setDurationMinutes] = useState(60);
+  const [breakEnabled, setBreakEnabled] = useState(false);
+  const [breakStartMinute, setBreakStartMinute] = useState(30);
+  const [breakDurationMinutes, setBreakDurationMinutes] = useState(10);
   const [dueAt, setDueAt] = useState("");
   const [selectedClassIds, setSelectedClassIds] = useState<Set<string>>(new Set());
   const [selectedQuestionIds, setSelectedQuestionIds] = useState<Set<string>>(new Set());
@@ -44,6 +47,12 @@ export function CreateAssessmentModal({
       .catch(() => setError("Não foi possível carregar turmas e questões."))
       .finally(() => setLoading(false));
   }, []);
+
+  const canAddBreak = durationMinutes > 60;
+
+  useEffect(() => {
+    if (!canAddBreak) setBreakEnabled(false);
+  }, [canAddBreak]);
 
   const subjectOptions = useMemo(() => Array.from(new Set(questions.map((q) => q.subject))).sort(), [questions]);
   const topicOptions = useMemo(() => Array.from(new Set(questions.map((q) => q.topic))).sort(), [questions]);
@@ -82,12 +91,18 @@ export function CreateAssessmentModal({
       setError("Selecione pelo menos uma questão.");
       return;
     }
+    if (breakEnabled && canAddBreak && breakStartMinute >= durationMinutes) {
+      setError("A pausa deve começar antes do fim da avaliação.");
+      return;
+    }
 
     setSubmitting(true);
     try {
       await createAssessment({
         title,
         durationMinutes,
+        breakStartMinute: breakEnabled && canAddBreak ? breakStartMinute : undefined,
+        breakDurationMinutes: breakEnabled && canAddBreak ? breakDurationMinutes : undefined,
         classIds: Array.from(selectedClassIds),
         questionIds: Array.from(selectedQuestionIds),
         dueAt: dueAt ? new Date(dueAt).toISOString() : undefined,
@@ -143,6 +158,46 @@ export function CreateAssessmentModal({
                   />
                 </div>
               </div>
+
+              {canAddBreak && (
+                <div className="rounded-lg border border-white/10 bg-white/[0.02] p-3">
+                  <label className="flex items-center gap-2 text-xs text-neutral-300">
+                    <input
+                      type="checkbox"
+                      checked={breakEnabled}
+                      onChange={(e) => setBreakEnabled(e.target.checked)}
+                      className="h-3.5 w-3.5 shrink-0 rounded border-white/20 bg-transparent accent-orange-500 text-orange-500 focus:ring-0"
+                    />
+                    Adicionar pausa durante a prova
+                  </label>
+
+                  {breakEnabled && (
+                    <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      <div>
+                        <label className="mb-1.5 block text-xs text-neutral-400">Iniciar pausa após (minutos)</label>
+                        <input
+                          type="number"
+                          min={1}
+                          max={durationMinutes - 1}
+                          className={inputClass}
+                          value={breakStartMinute}
+                          onChange={(e) => setBreakStartMinute(Number(e.target.value))}
+                        />
+                      </div>
+                      <div>
+                        <label className="mb-1.5 block text-xs text-neutral-400">Duração da pausa (minutos)</label>
+                        <input
+                          type="number"
+                          min={1}
+                          className={inputClass}
+                          value={breakDurationMinutes}
+                          onChange={(e) => setBreakDurationMinutes(Number(e.target.value))}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div>
                 <label className="mb-1.5 block text-xs text-neutral-400">Data de entrega (opcional)</label>

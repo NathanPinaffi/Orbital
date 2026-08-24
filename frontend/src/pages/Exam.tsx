@@ -82,6 +82,9 @@ export default function Exam() {
           title={state.title}
           questions={state.questions}
           initialRemainingSeconds={state.remainingSeconds}
+          onBreakNow={state.onBreakNow}
+          secondsUntilBreak={state.secondsUntilBreak}
+          breakDurationSeconds={state.breakDurationSeconds}
           onSubmit={handleSubmit}
         />
       )}

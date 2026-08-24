@@ -60,7 +60,29 @@ examsRouter.get("/:assessmentId", async (req: AuthedRequest, res, next) => {
     }
 
     const elapsedSeconds = (Date.now() - submission.startedAt.getTime()) / 1000;
-    const remainingSeconds = Math.max(0, Math.round(assessment.durationMinutes * 60 - elapsedSeconds));
+
+    const breakStartSeconds = assessment.breakStartMinute != null ? assessment.breakStartMinute * 60 : null;
+    const breakDurationSeconds = assessment.breakDurationMinutes != null ? assessment.breakDurationMinutes * 60 : null;
+    const breakEndSeconds = breakStartSeconds != null && breakDurationSeconds != null ? breakStartSeconds + breakDurationSeconds : null;
+
+    let remainingSeconds: number;
+    let onBreakNow = false;
+    let secondsUntilBreak: number | null = null;
+    let breakRemainingOrDurationSeconds: number | null = null;
+
+    if (breakStartSeconds != null && breakEndSeconds != null && elapsedSeconds >= breakStartSeconds && elapsedSeconds < breakEndSeconds) {
+      onBreakNow = true;
+      breakRemainingOrDurationSeconds = Math.max(0, Math.round(breakEndSeconds - elapsedSeconds));
+      remainingSeconds = Math.max(0, Math.round(assessment.durationMinutes * 60 - breakStartSeconds));
+    } else if (breakStartSeconds != null && breakDurationSeconds != null && breakEndSeconds != null && elapsedSeconds >= breakEndSeconds) {
+      remainingSeconds = Math.max(0, Math.round(assessment.durationMinutes * 60 - (elapsedSeconds - breakDurationSeconds)));
+    } else {
+      remainingSeconds = Math.max(0, Math.round(assessment.durationMinutes * 60 - elapsedSeconds));
+      if (breakStartSeconds != null && breakDurationSeconds != null) {
+        secondsUntilBreak = Math.max(0, Math.round(breakStartSeconds - elapsedSeconds));
+        breakRemainingOrDurationSeconds = breakDurationSeconds;
+      }
+    }
 
     const orderedQuestions = shuffle(assessment.questions, submission.id);
     const questions = orderedQuestions.map((aq) => {
@@ -80,7 +102,15 @@ examsRouter.get("/:assessmentId", async (req: AuthedRequest, res, next) => {
       };
     });
 
-    res.json({ status: "in_progress", title: assessment.title, remainingSeconds, questions });
+    res.json({
+      status: "in_progress",
+      title: assessment.title,
+      remainingSeconds,
+      questions,
+      onBreakNow,
+      secondsUntilBreak,
+      breakDurationSeconds: breakRemainingOrDurationSeconds,
+    });
   } catch (err) {
     next(err);
   }

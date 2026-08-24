@@ -269,6 +269,8 @@ export interface AssessmentSummary {
 export interface CreateAssessmentInput {
   title: string;
   durationMinutes: number;
+  breakStartMinute?: number;
+  breakDurationMinutes?: number;
   classIds: string[];
   questionIds: string[];
   dueAt?: string;
@@ -303,7 +305,15 @@ export interface ExamQuestion {
 
 export type ExamState =
   | { status: "not_started"; title: string; durationMinutes: number; questionCount: number }
-  | { status: "in_progress"; title: string; remainingSeconds: number; questions: ExamQuestion[] }
+  | {
+      status: "in_progress";
+      title: string;
+      remainingSeconds: number;
+      questions: ExamQuestion[];
+      onBreakNow: boolean;
+      secondsUntilBreak: number | null;
+      breakDurationSeconds: number | null;
+    }
   | { status: "submitted"; score: number | null };
 
 export function fetchExam(assessmentId: string): Promise<ExamState> {

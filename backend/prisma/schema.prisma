@@ -146,6 +146,8 @@ model Assessment {
   class               ClassSection      @relation(fields: [classId], references: [id])
   status              AssessmentStatus  @default(DRAFT)
   durationMinutes     Int
+  breakStartMinute    Int?
+  breakDurationMinutes Int?
   dueAt               DateTime?
   googleCourseWorkId  String?
   dueSoonNotifiedAt   DateTime?

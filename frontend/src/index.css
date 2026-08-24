@@ -61,6 +61,23 @@ body {
   animation-delay: 0.3s;
 }
 
+@keyframes rocketFlicker {
+  0%,
+  100% {
+    opacity: 0.85;
+    transform: scaleY(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scaleY(1.15);
+  }
+}
+
+.rocket-flame {
+  animation: rocketFlicker 0.6s ease-in-out infinite;
+  transform-origin: 50% 0%;
+}
+
 input:-webkit-autofill {
   -webkit-box-shadow: 0 0 0 1000px #050505 inset !important;
   -webkit-text-fill-color: #fff !important;

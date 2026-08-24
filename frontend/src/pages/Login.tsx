@@ -78,13 +78,6 @@ export default function Login() {
         <div className="absolute inset-0 z-0 bg-gradient-to-b from-yellow-300 via-orange-500 to-purple-700 opacity-60" />
         <div className="relative z-10 h-full rounded-[30px] bg-[#0A0A0A] p-8 sm:p-10">
           <div className="mb-8 text-center">
-            <span className="mb-5 inline-flex items-center gap-1.5 rounded border border-white/10 bg-white/5 px-2 py-1 text-[10px] uppercase text-neutral-400">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-400 opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-orange-500" />
-              </span>
-              Estude, vença, inspire!
-            </span>
             <h1 className="font-bricolage mb-2 text-3xl font-light tracking-tight text-white">
               Bem-vindo!
             </h1>

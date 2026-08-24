@@ -2,18 +2,7 @@ import { useMemo } from "react";
 import { GlassCard } from "./GlassCard";
 import { ClipboardListIcon, ClockIcon, CalendarIcon } from "../ui/dashboardIcons";
 import type { AssessmentSummary } from "../../lib/api";
-
-function timeAgo(iso: string) {
-  const diffMs = Date.now() - new Date(iso).getTime();
-  const minutes = Math.floor(diffMs / 60000);
-  if (minutes < 1) return "agora mesmo";
-  if (minutes < 60) return `há ${minutes} min`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `há ${hours}h`;
-  const days = Math.floor(hours / 24);
-  if (days < 30) return `há ${days}d`;
-  return new Date(iso).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
-}
+import { timeAgo } from "../../lib/time";
 
 function formatDueDate(iso: string) {
   return new Date(iso).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });

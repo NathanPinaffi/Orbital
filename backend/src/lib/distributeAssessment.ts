@@ -40,5 +40,18 @@ export async function distributeAssessment(
     data: { status: "PUBLISHED", googleCourseWorkId: courseWork.id },
   });
 
+  const enrollments = await prisma.enrollment.findMany({ where: { classId: assessment.classId } });
+  if (enrollments.length > 0) {
+    await prisma.notification.createMany({
+      data: enrollments.map((e) => ({
+        userId: e.studentId,
+        type: "NEW_ASSESSMENT" as const,
+        title: "Nova avaliação publicada",
+        body: `"${assessment.title}" foi publicada em ${assessment.class.name}`,
+        assessmentId: assessment.id,
+      })),
+    });
+  }
+
   return { courseWorkId: courseWork.id, alternateLink: courseWork.alternateLink };
 }

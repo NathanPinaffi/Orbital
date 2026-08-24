@@ -45,6 +45,35 @@ async function authFetch(path: string, init?: RequestInit) {
   return res.json();
 }
 
+export type NotificationType = "DUE_SOON" | "NEW_ASSESSMENT";
+
+export interface NotificationItem {
+  id: string;
+  type: NotificationType;
+  title: string;
+  body: string;
+  assessmentId: string | null;
+  readAt: string | null;
+  createdAt: string;
+}
+
+export interface NotificationsResponse {
+  unreadCount: number;
+  notifications: NotificationItem[];
+}
+
+export function fetchNotifications(): Promise<NotificationsResponse> {
+  return authFetch("/notifications");
+}
+
+export function markNotificationRead(id: string): Promise<void> {
+  return authFetch(`/notifications/${id}/read`, { method: "POST" });
+}
+
+export function markAllNotificationsRead(): Promise<void> {
+  return authFetch("/notifications/read-all", { method: "POST" });
+}
+
 export interface Me {
   id: string;
   name: string;

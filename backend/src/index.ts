@@ -9,6 +9,8 @@ import { classesRouter } from "./routes/classes.js";
 import { assessmentsRouter } from "./routes/assessments.js";
 import { examsRouter } from "./routes/exams.js";
 import { dashboardRouter } from "./routes/dashboard.js";
+import { notificationsRouter } from "./routes/notifications.js";
+import { startDueSoonChecker } from "./lib/dueSoonChecker.js";
 
 const app = express();
 
@@ -24,6 +26,7 @@ app.use("/classes", classesRouter);
 app.use("/assessments", assessmentsRouter);
 app.use("/exams", examsRouter);
 app.use("/dashboard", dashboardRouter);
+app.use("/notifications", notificationsRouter);
 
 app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error(err);
@@ -35,4 +38,5 @@ app.use((err: unknown, _req: express.Request, res: express.Response, _next: expr
 const port = process.env.PORT ?? 3333;
 app.listen(port, () => {
   console.log(`Orbital API rodando em http://localhost:${port}`);
+  startDueSoonChecker();
 });

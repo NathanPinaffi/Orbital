@@ -48,6 +48,11 @@ enum ProctoringEventType {
   UNUSUAL_TIMING
 }
 
+enum NotificationType {
+  DUE_SOON
+  NEW_ASSESSMENT
+}
+
 model User {
   id                String   @id @default(cuid())
   name              String
@@ -63,6 +68,7 @@ model User {
   enrollments       Enrollment[]
   questionsCreated  Question[]
   submissions       Submission[]
+  notifications     Notification[]
 }
 
 model ClassSection {
@@ -121,10 +127,12 @@ model Assessment {
   durationMinutes     Int
   dueAt               DateTime?
   googleCourseWorkId  String?
+  dueSoonNotifiedAt   DateTime?
   createdAt           DateTime          @default(now())
 
-  questions   AssessmentQuestion[]
-  submissions Submission[]
+  questions     AssessmentQuestion[]
+  submissions   Submission[]
+  notifications Notification[]
 }
 
 model AssessmentQuestion {
@@ -180,4 +188,19 @@ model ProctoringEvent {
   type         ProctoringEventType
   detail       String?
   occurredAt   DateTime            @default(now())
+}
+
+model Notification {
+  id           String            @id @default(cuid())
+  userId       String
+  user         User              @relation(fields: [userId], references: [id])
+  type         NotificationType
+  title        String
+  body         String
+  assessmentId String?
+  assessment   Assessment?       @relation(fields: [assessmentId], references: [id])
+  readAt       DateTime?
+  createdAt    DateTime          @default(now())
+
+  @@index([userId, createdAt])
 }

@@ -26,9 +26,16 @@ export async function distributeAssessment(
       maxPoints: 10,
       dueDate: assessment.dueAt
         ? {
-            year: assessment.dueAt.getFullYear(),
-            month: assessment.dueAt.getMonth() + 1,
-            day: assessment.dueAt.getDate(),
+            year: assessment.dueAt.getUTCFullYear(),
+            month: assessment.dueAt.getUTCMonth() + 1,
+            day: assessment.dueAt.getUTCDate(),
+          }
+        : undefined,
+      // O Google Sala de Aula interpreta dueDate/dueTime em UTC; ambos precisam vir juntos ou a API rejeita.
+      dueTime: assessment.dueAt
+        ? {
+            hours: assessment.dueAt.getUTCHours(),
+            minutes: assessment.dueAt.getUTCMinutes(),
           }
         : undefined,
       materials: [{ link: { url: `${appUrl}/assessments/${assessment.id}` } }],

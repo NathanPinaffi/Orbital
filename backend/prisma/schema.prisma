@@ -131,6 +131,7 @@ model Question {
   graphXMax       Float?
   graphYMin       Float?
   graphYMax       Float?
+  requiresSketch  Boolean @default(false)
 
   alternatives     Alternative[]
   assessmentLinks  AssessmentQuestion[]
@@ -200,6 +201,7 @@ model Answer {
   questionId     String
   question       Question   @relation(fields: [questionId], references: [id])
   response       String
+  sketchData     String?
   isCorrect      Boolean?
   points         Float?
   teacherComment String?

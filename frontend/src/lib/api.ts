@@ -165,6 +165,7 @@ export interface Question {
   createdAt: string;
   bank: QuestionBankLite;
   graph: QuestionGraph | null;
+  requiresSketch: boolean;
 }
 
 export type QuestionInput =
@@ -178,6 +179,7 @@ export type QuestionInput =
       bloomLevel: BloomLevel;
       alternatives: { content: string; isCorrect: boolean }[];
       graph?: QuestionGraph | null;
+      requiresSketch?: boolean;
     }
   | {
       type: "TRUE_FALSE";
@@ -189,6 +191,7 @@ export type QuestionInput =
       bloomLevel: BloomLevel;
       correctAnswer: boolean;
       graph?: QuestionGraph | null;
+      requiresSketch?: boolean;
     }
   | {
       type: "ESSAY";
@@ -199,6 +202,7 @@ export type QuestionInput =
       difficulty: Difficulty;
       bloomLevel: BloomLevel;
       graph?: QuestionGraph | null;
+      requiresSketch?: boolean;
     };
 
 export function fetchQuestionBanks(): Promise<{ mine: QuestionBankSummary[]; public: QuestionBankSummary[] }> {
@@ -312,12 +316,15 @@ export interface ExamAlternative {
   content: string;
 }
 
+export type Stroke = [number, number][];
+
 export interface ExamQuestion {
   id: string;
   content: string;
   type: QuestionType;
   alternatives: ExamAlternative[];
   graph: QuestionGraph | null;
+  requiresSketch: boolean;
 }
 
 export type ExamState =
@@ -343,7 +350,7 @@ export function startExam(assessmentId: string): Promise<{ startedAt: string }> 
 
 export function submitExam(
   assessmentId: string,
-  answers: { questionId: string; response: string }[],
+  answers: { questionId: string; response: string; sketch?: Stroke[] }[],
 ): Promise<{ status: "submitted"; score: number | null }> {
   return authFetch(`/exams/${assessmentId}/submit`, { method: "POST", body: JSON.stringify({ answers }) });
 }
@@ -404,6 +411,7 @@ export interface GradingAlternative {
 export interface GradingAnswer {
   id: string;
   response: string;
+  sketchData: Stroke[] | null;
   isCorrect: boolean | null;
   points: number | null;
   teacherComment: string | null;
@@ -418,6 +426,7 @@ export interface GradingQuestion {
   alternatives: GradingAlternative[];
   answer: GradingAnswer | null;
   graph: QuestionGraph | null;
+  requiresSketch: boolean;
 }
 
 export interface SubmissionDetail {

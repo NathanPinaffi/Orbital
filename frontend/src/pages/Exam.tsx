@@ -4,7 +4,7 @@ import { ExamShell } from "../components/exam/ExamShell";
 import { ExamWarning } from "../components/exam/ExamWarning";
 import { ExamRunner } from "../components/exam/ExamRunner";
 import { HappyPlanet } from "../components/exam/HappyPlanet";
-import { ApiError, fetchExam, startExam, submitExam, type ExamState } from "../lib/api";
+import { ApiError, fetchExam, startExam, submitExam, type ExamState, type Stroke } from "../lib/api";
 
 export default function Exam() {
   const { id } = useParams<{ id: string }>();
@@ -37,12 +37,17 @@ export default function Exam() {
     }
   }
 
-  async function handleSubmit(answers: Record<string, string>) {
+  async function handleSubmit(answers: Record<string, string>, sketches: Record<string, Stroke[]>) {
     if (!id) return;
     try {
+      const questionIds = new Set([...Object.keys(answers), ...Object.keys(sketches)]);
       const result = await submitExam(
         id,
-        Object.entries(answers).map(([questionId, response]) => ({ questionId, response })),
+        Array.from(questionIds).map((questionId) => ({
+          questionId,
+          response: answers[questionId] ?? "",
+          sketch: sketches[questionId],
+        })),
       );
       setFinalScore(result.score);
       setState({ status: "submitted", score: result.score });

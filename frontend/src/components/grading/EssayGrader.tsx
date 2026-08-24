@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { SketchPad } from "../common/SketchPad";
 import type { GradingQuestion } from "../../lib/api";
 
 export function EssayGrader({
@@ -35,6 +36,17 @@ export function EssayGrader({
       <div className="rounded-lg bg-white/[0.02] px-3 py-2 text-sm text-neutral-300 ring-1 ring-white/5">
         {answer?.response || <span className="text-neutral-600">Sem resposta</span>}
       </div>
+
+      {question.requiresSketch && (
+        <div>
+          <p className="mb-1.5 text-xs text-neutral-400">Esboço do aluno</p>
+          {answer?.sketchData && answer.sketchData.length > 0 ? (
+            <SketchPad value={answer.sketchData} readOnly />
+          ) : (
+            <p className="text-xs text-neutral-600">Nenhum esboço enviado.</p>
+          )}
+        </div>
+      )}
 
       <div className="flex flex-wrap items-end gap-3">
         <div>

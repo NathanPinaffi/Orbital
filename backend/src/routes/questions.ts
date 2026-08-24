@@ -28,6 +28,7 @@ const baseFields = {
   difficulty: difficultySchema,
   bloomLevel: bloomLevelSchema,
   graph: graphSchema.nullable().optional(),
+  requiresSketch: z.boolean().optional().default(false),
 };
 
 const questionSchema = z.discriminatedUnion("type", [
@@ -150,6 +151,7 @@ questionsRouter.post("/", async (req: AuthedRequest, res, next) => {
         graphXMax: body.graph?.graphXMax ?? null,
         graphYMin: body.graph?.graphYMin ?? null,
         graphYMax: body.graph?.graphYMax ?? null,
+        requiresSketch: body.requiresSketch,
         alternatives: { create: alternativesForCreate(body) },
       },
       include: { alternatives: true },
@@ -198,6 +200,7 @@ questionsRouter.put("/:id", async (req: AuthedRequest, res, next) => {
           graphXMax: body.graph?.graphXMax ?? null,
           graphYMin: body.graph?.graphYMin ?? null,
           graphYMax: body.graph?.graphYMax ?? null,
+          requiresSketch: body.requiresSketch,
           alternatives: { create: alternativesForCreate(body) },
         },
         include: { alternatives: true },

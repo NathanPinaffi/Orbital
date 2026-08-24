@@ -99,6 +99,7 @@ examsRouter.get("/:assessmentId", async (req: AuthedRequest, res, next) => {
         content: aq.question.content,
         type: aq.question.type,
         alternatives,
+        requiresSketch: aq.question.requiresSketch,
         graph:
           aq.question.graphExpression != null
             ? {
@@ -143,8 +144,16 @@ examsRouter.post("/:assessmentId/start", async (req: AuthedRequest, res, next) =
   }
 });
 
+const strokeSchema = z.array(z.tuple([z.number(), z.number()]));
+
 const submitSchema = z.object({
-  answers: z.array(z.object({ questionId: z.string(), response: z.string() })),
+  answers: z.array(
+    z.object({
+      questionId: z.string(),
+      response: z.string(),
+      sketch: z.array(strokeSchema).max(200).optional(),
+    }),
+  ),
 });
 
 /** Recebe as respostas, corrige as questões objetivas e calcula a nota. */
@@ -174,8 +183,10 @@ examsRouter.post("/:assessmentId/submit", async (req: AuthedRequest, res, next) 
       const aq = assessment.questions.find((q) => q.questionId === a.questionId);
       if (!aq) return null;
 
+      const sketchData = aq.question.requiresSketch && a.sketch && a.sketch.length > 0 ? JSON.stringify(a.sketch) : null;
+
       if (aq.question.type === "ESSAY") {
-        return { questionId: a.questionId, response: a.response, isCorrect: null, points: null };
+        return { questionId: a.questionId, response: a.response, sketchData, isCorrect: null, points: null };
       }
 
       totalObjectivePoints += aq.points;
@@ -183,7 +194,7 @@ examsRouter.post("/:assessmentId/submit", async (req: AuthedRequest, res, next) 
       const isCorrect = chosen?.isCorrect ?? false;
       if (isCorrect) earnedPoints += aq.points;
 
-      return { questionId: a.questionId, response: a.response, isCorrect, points: isCorrect ? aq.points : 0 };
+      return { questionId: a.questionId, response: a.response, sketchData, isCorrect, points: isCorrect ? aq.points : 0 };
     });
 
     const validAnswers = answerRows.filter((a): a is NonNullable<typeof a> => a !== null);
@@ -196,6 +207,7 @@ examsRouter.post("/:assessmentId/submit", async (req: AuthedRequest, res, next) 
           submissionId: submission.id,
           questionId: a.questionId,
           response: a.response,
+          sketchData: a.sketchData,
           isCorrect: a.isCorrect,
           points: a.points,
         })),

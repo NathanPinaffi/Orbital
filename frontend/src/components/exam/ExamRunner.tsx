@@ -2,8 +2,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ClockIcon } from "../ui/dashboardIcons";
 import { MathText } from "../common/MathText";
 import { FunctionGraph } from "../common/FunctionGraph";
+import { SketchPad } from "../common/SketchPad";
 import { RestScreen } from "./RestScreen";
-import type { ExamQuestion } from "../../lib/api";
+import type { ExamQuestion, Stroke } from "../../lib/api";
 
 function formatTime(totalSeconds: number) {
   const m = Math.floor(totalSeconds / 60)
@@ -36,9 +37,10 @@ export function ExamRunner({
   onBreakNow: boolean;
   secondsUntilBreak: number | null;
   breakDurationSeconds: number | null;
-  onSubmit: (answers: Record<string, string>) => void;
+  onSubmit: (answers: Record<string, string>, sketches: Record<string, Stroke[]>) => void;
 }) {
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [sketches, setSketches] = useState<Record<string, Stroke[]>>({});
   const [remaining, setRemaining] = useState(initialRemainingSeconds);
   const [phase, setPhase] = useState<"answering" | "break">(onBreakNow ? "break" : "answering");
   const [breakRemaining, setBreakRemaining] = useState(onBreakNow ? (breakDurationSeconds ?? 0) : (breakDurationSeconds ?? 0));
@@ -94,7 +96,7 @@ export function ExamRunner({
         if (secondsLeft === 0 && !submittedRef.current) {
           submittedRef.current = true;
           clearInterval(interval);
-          onSubmit(answers);
+          onSubmit(answers, sketches);
         }
       }
     }, 1000);
@@ -118,6 +120,10 @@ export function ExamRunner({
     setAnswers((prev) => ({ ...prev, [questionId]: value }));
   }
 
+  function setSketch(questionId: string, strokes: Stroke[]) {
+    setSketches((prev) => ({ ...prev, [questionId]: strokes }));
+  }
+
   function scrollToQuestion(id: string) {
     questionRefs.current[id]?.scrollIntoView({ behavior: "smooth", block: "center" });
   }
@@ -128,7 +134,7 @@ export function ExamRunner({
       return;
     }
     submittedRef.current = true;
-    onSubmit(answers);
+    onSubmit(answers, sketches);
   }
 
   return (
@@ -189,12 +195,20 @@ export function ExamRunner({
             {q.graph && <FunctionGraph spec={q.graph} className="mb-5" />}
 
             {q.type === "ESSAY" ? (
-              <textarea
-                className="min-h-32 w-full resize-y rounded-lg border border-white/10 bg-[#050505] px-3 py-2 text-sm text-white placeholder:text-neutral-600 focus:border-orange-500/50 focus:outline-none"
-                placeholder="Digite sua resposta..."
-                value={answers[q.id] ?? ""}
-                onChange={(e) => setAnswer(q.id, e.target.value)}
-              />
+              <div className="space-y-3">
+                <textarea
+                  className="min-h-32 w-full resize-y rounded-lg border border-white/10 bg-[#050505] px-3 py-2 text-sm text-white placeholder:text-neutral-600 focus:border-orange-500/50 focus:outline-none"
+                  placeholder="Digite sua resposta..."
+                  value={answers[q.id] ?? ""}
+                  onChange={(e) => setAnswer(q.id, e.target.value)}
+                />
+                {q.requiresSketch && (
+                  <div>
+                    <p className="mb-1.5 text-xs text-neutral-400">Esboce o gráfico da sua resposta</p>
+                    <SketchPad value={sketches[q.id] ?? []} onChange={(strokes) => setSketch(q.id, strokes)} />
+                  </div>
+                )}
+              </div>
             ) : (
               <div className="space-y-2">
                 {q.alternatives.map((alt) => (

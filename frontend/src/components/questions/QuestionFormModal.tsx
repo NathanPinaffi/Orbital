@@ -75,6 +75,7 @@ export function QuestionFormModal({
   const [graphXMax, setGraphXMax] = useState(question?.graph?.xMax ?? 10);
   const [graphYMin, setGraphYMin] = useState(question?.graph?.yMin ?? -10);
   const [graphYMax, setGraphYMax] = useState(question?.graph?.yMax ?? 10);
+  const [requiresSketch, setRequiresSketch] = useState(question?.requiresSketch ?? false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -121,7 +122,16 @@ export function QuestionFormModal({
       ? { expression: graphExpression.trim(), xMin: graphXMin, xMax: graphXMax, yMin: graphYMin, yMax: graphYMax }
       : null;
 
-    const common = { bankId, subject, topic, content, difficulty, bloomLevel, graph };
+    const common = {
+      bankId,
+      subject,
+      topic,
+      content,
+      difficulty,
+      bloomLevel,
+      graph,
+      requiresSketch: type === "ESSAY" && requiresSketch,
+    };
     let input: QuestionInput;
 
     if (type === "MULTIPLE_CHOICE") {
@@ -269,7 +279,7 @@ export function QuestionFormModal({
                   onChange={(e) => setGraphEnabled(e.target.checked)}
                   className="h-3.5 w-3.5 shrink-0 rounded border-white/20 bg-transparent accent-orange-500 text-orange-500 focus:ring-0"
                 />
-                Incluir gráfico de função (ex: análise de f(x))
+                Exibir gráfico de referência para o aluno (ex: análise de f(x))
               </label>
 
               {graphEnabled && (
@@ -325,6 +335,25 @@ export function QuestionFormModal({
                 </div>
               )}
             </div>
+
+            {type === "ESSAY" && (
+              <div className="rounded-lg border border-white/10 bg-white/[0.02] p-3">
+                <label className="flex items-center gap-2 text-xs text-neutral-300">
+                  <input
+                    type="checkbox"
+                    checked={requiresSketch}
+                    onChange={(e) => setRequiresSketch(e.target.checked)}
+                    className="h-3.5 w-3.5 shrink-0 rounded border-white/20 bg-transparent accent-orange-500 text-orange-500 focus:ring-0"
+                  />
+                  Pedir que o aluno esboce um gráfico na resposta
+                </label>
+                {requiresSketch && (
+                  <p className="mt-1.5 text-[11px] text-neutral-600">
+                    Uma área de desenho aparecerá abaixo da resposta do aluno durante a prova.
+                  </p>
+                )}
+              </div>
+            )}
 
             {type === "MULTIPLE_CHOICE" && (
               <div>

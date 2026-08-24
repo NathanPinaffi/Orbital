@@ -153,10 +153,16 @@ assessmentsRouter.get("/:assessmentId/pdf", async (req: AuthedRequest, res, next
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `attachment; filename="${filenameSlug || "prova"}.pdf"`);
 
+    const dateLabel = assessment.dueAt
+      ? `Data de entrega: ${assessment.dueAt.toLocaleDateString("pt-BR", { timeZone: "UTC" })}`
+      : `Gerado em: ${new Date().toLocaleDateString("pt-BR")}`;
+
     const doc = generateAssessmentPdf({
       title: assessment.title,
       teacherName: teacher?.name ?? "",
       className: assessment.class.name,
+      durationMinutes: assessment.durationMinutes,
+      dateLabel,
       questions: assessmentQuestions.map((aq) => ({
         content: aq.question.content,
         type: aq.question.type,

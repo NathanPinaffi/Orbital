@@ -128,17 +128,7 @@ export function generateAssessmentPdf({
         doc.y = drawRichText(doc, alt.content, MARGIN + 20 + labelWidth, altTop, usableWidth - 20 - labelWidth, 11, "Times-Roman");
       });
     } else {
-      const spaceLines = question.requiresSketch ? 2 : 5;
-      doc.moveDown(spaceLines * 1.1);
-
-      if (question.requiresSketch) {
-        doc.moveDown(0.8);
-        doc.font("Times-Italic").fontSize(10).fillColor("#666666").text("Espaço para o esboço do gráfico:");
-        doc.fillColor("black");
-        const boxWidth = doc.page.width - doc.page.margins.left - doc.page.margins.right;
-        doc.rect(doc.x, doc.y + 4, boxWidth, 140).strokeColor("#aaaaaa").stroke();
-        doc.moveDown(8.5);
-      }
+      doc.moveDown(5 * 1.1);
     }
 
     doc.moveDown(1);

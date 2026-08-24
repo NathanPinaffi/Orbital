@@ -5,9 +5,58 @@ import { liteAdaptor } from "mathjax-full/js/adaptors/liteAdaptor.js";
 import { RegisterHTMLHandler } from "mathjax-full/js/handlers/html.js";
 import { AllPackages } from "mathjax-full/js/input/tex/AllPackages.js";
 
+// Atalhos que o KaTeX (usado no preview do frontend) reconhece nativamente mas não
+// fazem parte do MathJax/LaTeX padrão. Redefinidos aqui para que uma fórmula que
+// renderiza no preview não vire "não reconhecida" na hora de gerar o PDF.
+const KATEX_COMPAT_MACROS: Record<string, string> = {
+  Alef: "\\aleph",
+  Complex: "\\mathbb{C}",
+  Dagger: "\\ddagger",
+  N: "\\mathbb{N}",
+  R: "\\mathbb{R}",
+  Z: "\\mathbb{Z}",
+  alef: "\\aleph",
+  alefsym: "\\aleph",
+  bull: "\\bullet",
+  clubs: "\\clubsuit",
+  cnums: "\\mathbb{C}",
+  diamonds: "\\diamondsuit",
+  empty: "\\emptyset",
+  exist: "\\exists",
+  harr: "\\leftrightarrow",
+  hArr: "\\Leftrightarrow",
+  Harr: "\\Leftrightarrow",
+  hearts: "\\heartsuit",
+  image: "\\Im",
+  infin: "\\infty",
+  isin: "\\in",
+  larr: "\\leftarrow",
+  lArr: "\\Leftarrow",
+  Larr: "\\Leftarrow",
+  lrarr: "\\leftrightarrow",
+  lrArr: "\\Leftrightarrow",
+  Lrarr: "\\Leftrightarrow",
+  natnums: "\\mathbb{N}",
+  plusmn: "\\pm",
+  rarr: "\\rightarrow",
+  rArr: "\\Rightarrow",
+  Rarr: "\\Rightarrow",
+  real: "\\Re",
+  reals: "\\mathbb{R}",
+  Reals: "\\mathbb{R}",
+  sdot: "\\cdot",
+  sect: "\\S",
+  spades: "\\spadesuit",
+  sub: "\\subset",
+  sube: "\\subseteq",
+  supe: "\\supseteq",
+  thetasym: "\\vartheta",
+  weierp: "\\wp",
+};
+
 const adaptor = liteAdaptor();
 RegisterHTMLHandler(adaptor);
-const texInput = new TeX({ packages: AllPackages });
+const texInput = new TeX({ packages: AllPackages, macros: KATEX_COMPAT_MACROS });
 const svgOutput = new SVG({ fontCache: "none" });
 const mathDocument = mathjax.document("", { InputJax: texInput, OutputJax: svgOutput });
 

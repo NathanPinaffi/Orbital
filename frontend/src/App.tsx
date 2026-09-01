@@ -12,9 +12,12 @@ import Exam from "./pages/Exam";
 import AuthCallback from "./pages/AuthCallback";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
+import { Analytics } from "@vercel/analytics/next"
+
 export default function App() {
   return (
     <BrowserRouter>
+      <Analytics />
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/auth/callback" element={<AuthCallback />} />

@@ -1,18 +1,15 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import gsap from "gsap";
 import { AuthBackground } from "../components/layout/AuthBackground";
 import { Button } from "../components/ui/Button";
-import { TextField } from "../components/ui/TextField";
-import { GoogleIcon, LockIcon, MailIcon } from "../components/ui/icons";
+import { GoogleIcon } from "../components/ui/icons";
 import { loginWithGoogle } from "../lib/api";
 import { safeRedirectPath } from "../lib/safeRedirect";
 
 import logo from "../assets/logo.png";
 
 export default function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [params] = useSearchParams();
   const googleAuthFailed = params.get("error") === "google_auth_failed";
   const redirect = safeRedirectPath(params.get("redirect"));
@@ -57,11 +54,6 @@ export default function Login() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    // TODO: integrar com a API de autenticação do backend
-  }
-
   return (
     <AuthBackground>
       <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center">
@@ -97,48 +89,10 @@ export default function Login() {
             </p>
           )}
 
-          <Button type="button" variant="secondary" className="mb-6" onClick={() => loginWithGoogle(redirect)}>
+          <Button type="button" variant="secondary" onClick={() => loginWithGoogle(redirect)}>
             <GoogleIcon />
             Entrar com Google Sala de Aula
           </Button>
-
-          <div className="relative mb-6 flex h-px w-full items-center justify-center bg-gradient-to-r from-transparent via-orange-500/40 to-transparent">
-            <span className="bg-[#0A0A0A] px-3 text-[10px] uppercase text-neutral-500">
-              ou continue com e-mail
-            </span>
-          </div>
-
-          <form className="space-y-4" onSubmit={handleSubmit}>
-            <TextField
-              label="E-mail institucional"
-              icon={<MailIcon />}
-              type="email"
-              required
-              placeholder="voce@escola.edu.br"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-
-            <TextField
-              label="Senha"
-              icon={<LockIcon />}
-              type="password"
-              required
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              trailing={
-                <a href="#" className="text-xs text-orange-400 transition-colors hover:text-orange-300">
-                  Esqueceu a senha?
-                </a>
-              }
-            />
-            <br />
-
-            <Button type="submit" className="mt-2">
-              Entrar
-            </Button>
-          </form>
 
           <p className="mt-8 text-center text-xs text-neutral-500">
             Ainda não tem conta?{" "}

@@ -89,7 +89,7 @@ export function Topbar() {
         </h1>
         <p className="text-sm text-neutral-500">
           <br />
-          Bem-vinda de volta — aqui está o resumo das suas turmas.
+        Orbital - Plataforma de Ensino
         </p>
       </div>
 

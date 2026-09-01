@@ -4,6 +4,7 @@ import { createOAuthClient, getAuthUrl, classroomClient } from "../lib/google.js
 import { prisma } from "../lib/prisma.js";
 import { signUserToken } from "../lib/jwt.js";
 import { importAllCourses } from "../lib/importClassroom.js";
+import { safeRedirectPath } from "../lib/safeRedirect.js";
 
 export const googleAuthRouter = Router();
 
@@ -11,7 +12,7 @@ const FRONTEND_URL = process.env.FRONTEND_URL ?? "http://localhost:5173";
 
 // 1) Front-end redireciona o usuário para cá.
 googleAuthRouter.get("/google", (req, res) => {
-  const redirect = typeof req.query.redirect === "string" ? req.query.redirect : undefined;
+  const redirect = safeRedirectPath(typeof req.query.redirect === "string" ? req.query.redirect : undefined);
   res.redirect(getAuthUrl(redirect));
 });
 
@@ -67,7 +68,7 @@ googleAuthRouter.get("/google/callback", async (req, res) => {
     }
 
     const jwtToken = signUserToken(user);
-    const state = typeof req.query.state === "string" ? req.query.state : undefined;
+    const state = safeRedirectPath(typeof req.query.state === "string" ? req.query.state : undefined);
     const redirectParam = state ? `&redirect=${encodeURIComponent(state)}` : "";
     res.redirect(`${FRONTEND_URL}/auth/callback?token=${jwtToken}${redirectParam}`);
   } catch (err) {

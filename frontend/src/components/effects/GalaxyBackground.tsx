@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { secureRandom } from "../../lib/random";
 
 interface Star {
   x: number; // -1..1 world space, relative to center
@@ -81,46 +82,46 @@ export function GalaxyBackground({
 
     const count = Math.round(480 * density);
     const stars: Star[] = Array.from({ length: count }, () => ({
-      x: Math.random() * 2 - 1,
-      y: Math.random() * 2 - 1,
-      radius: Math.random() * 1.3 + 0.3,
-      baseAlpha: Math.random() * 0.6 + 0.35,
-      twinkleSpeed: Math.random() * 0.02 + 0.006,
-      twinklePhase: Math.random() * Math.PI * 2,
-      depth: Math.random() * 0.7 + 0.2,
-      hue: Math.random() < 0.14 ? "warm" : Math.random() < 0.06 ? "cool" : "white",
+      x: secureRandom() * 2 - 1,
+      y: secureRandom() * 2 - 1,
+      radius: secureRandom() * 1.3 + 0.3,
+      baseAlpha: secureRandom() * 0.6 + 0.35,
+      twinkleSpeed: secureRandom() * 0.02 + 0.006,
+      twinklePhase: secureRandom() * Math.PI * 2,
+      depth: secureRandom() * 0.7 + 0.2,
+      hue: secureRandom() < 0.14 ? "warm" : secureRandom() < 0.06 ? "cool" : "white",
     }));
 
     const planetCount = Math.max(2, Math.round(2 * density));
     const planets: Planet[] = Array.from({ length: planetCount }, () => {
-      const palette = PLANET_PALETTE[Math.floor(Math.random() * PLANET_PALETTE.length)];
+      const palette = PLANET_PALETTE[Math.floor(secureRandom() * PLANET_PALETTE.length)];
       return {
-        x: Math.random() * 1.6 - 0.8,
-        y: Math.random() * 1.6 - 0.8,
-        radius: Math.random() * 10 + 8,
+        x: secureRandom() * 1.6 - 0.8,
+        y: secureRandom() * 1.6 - 0.8,
+        radius: secureRandom() * 10 + 8,
         color: palette.color,
         ringColor: palette.ringColor,
-        depth: Math.random() * 0.3 + 0.05,
-        orbitSpeed: Math.random() * 0.0004 + 0.0001,
-        orbitRadius: Math.random() * 14 + 6,
-        orbitPhase: Math.random() * Math.PI * 2,
+        depth: secureRandom() * 0.3 + 0.05,
+        orbitSpeed: secureRandom() * 0.0004 + 0.0001,
+        orbitRadius: secureRandom() * 14 + 6,
+        orbitPhase: secureRandom() * Math.PI * 2,
       };
     });
 
     let comets: Comet[] = [];
-    let framesUntilNextComet = (120 + Math.random() * 240) * 0.7;
+    let framesUntilNextComet = (120 + secureRandom() * 240) * 0.7;
 
     function spawnComet() {
-      const fromLeft = Math.random() < 0.5;
-      const startY = Math.random() * height * 0.6;
-      const speed = Math.random() * 2.5 + 3.5;
+      const fromLeft = secureRandom() < 0.5;
+      const startY = secureRandom() * height * 0.6;
+      const speed = secureRandom() * 2.5 + 3.5;
       const angle = (fromLeft ? 1 : -1) * (Math.PI / 5) + Math.PI / 2;
       comets.push({
         x: fromLeft ? -40 : width + 40,
         y: startY,
         vx: (fromLeft ? 1 : -1) * speed,
         vy: Math.sin(angle) * speed * 0.4,
-        length: Math.random() * 60 + 60,
+        length: secureRandom() * 60 + 60,
         life: 0,
         maxLife: 1,
         age: 0,
@@ -201,7 +202,7 @@ export function GalaxyBackground({
       framesUntilNextComet -= 1;
       if (framesUntilNextComet <= 0) {
         spawnComet();
-        framesUntilNextComet = (240 + Math.random() * 360) * 0.7;
+        framesUntilNextComet = (240 + secureRandom() * 360) * 0.7;
       }
 
       comets = comets.filter((c) => {

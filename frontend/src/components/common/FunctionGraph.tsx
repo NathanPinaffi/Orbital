@@ -64,7 +64,7 @@ function buildPaths(expression: string, xMin: number, xMax: number, yMin: number
 
 export function FunctionGraph({ spec, className }: { spec: GraphSpec; className?: string }) {
   const { expression, xMin, xMax, yMin, yMax } = spec;
-  const clipId = useMemo(() => `graph-clip-${Math.random().toString(36).slice(2)}`, []);
+  const clipId = useMemo(() => `graph-clip-${crypto.randomUUID()}`, []);
   const [open, setOpen] = useState(false);
 
   const { paths, error } = useMemo(

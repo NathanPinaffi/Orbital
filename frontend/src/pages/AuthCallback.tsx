@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { saveToken } from "../lib/api";
+import { safeRedirectPath } from "../lib/safeRedirect";
 
 export default function AuthCallback() {
   const [params] = useSearchParams();
@@ -10,7 +11,7 @@ export default function AuthCallback() {
     const token = params.get("token");
     if (token) {
       saveToken(token);
-      const redirect = params.get("redirect");
+      const redirect = safeRedirectPath(params.get("redirect"));
       navigate(redirect || "/dashboard", { replace: true });
     } else {
       navigate("/login?error=google_auth_failed", { replace: true });

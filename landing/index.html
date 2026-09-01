@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orbital — Avaliações digitais integradas ao Classroom</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="stars"></div>
+
+<header class="nav">
+  <div class="nav-inner">
+    <div class="logo">
+      <span class="logo-dot"></span> Orbital
+    </div>
+    <nav class="nav-links">
+      <a href="#como-funciona">Como funciona</a>
+      <a href="#recursos">Recursos</a>
+      <a href="#cta">Começar</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero" id="hero">
+    <div class="hero-text">
+      <p class="eyebrow">Feito para professores e turmas</p>
+      <h1>Cada prova, montada<br> peça por peça.</h1>
+      <p class="subtitle">
+        Monte avaliações a partir de um banco de questões, distribua
+        automaticamente no Google Sala de Aula e deixe a correção
+        decolar sozinha.
+      </p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="#cta">Começar agora</a>
+        <a class="btn btn-ghost" href="#como-funciona">Ver como funciona</a>
+      </div>
+    </div>
+
+    <div class="hero-rocket">
+      <svg id="rocket" viewBox="0 0 300 420" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="bodyGrad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#e9ecff"/>
+            <stop offset="100%" stop-color="#b9c0f5"/>
+          </linearGradient>
+          <radialGradient id="flameGrad" cx="50%" cy="0%" r="80%">
+            <stop offset="0%" stop-color="#ffe9a8"/>
+            <stop offset="55%" stop-color="#ff9a4d"/>
+            <stop offset="100%" stop-color="#ff5252"/>
+          </radialGradient>
+        </defs>
+
+        <!-- exhaust glow, drawn first so it sits behind -->
+        <g class="anchor" transform="translate(150,395)">
+          <g class="piece" data-piece="glow">
+            <ellipse cx="0" cy="0" rx="46" ry="16" fill="#6c5ce7" opacity="0.35"/>
+          </g>
+        </g>
+
+        <!-- flame -->
+        <g class="anchor" transform="translate(150,350)">
+          <g class="piece" data-piece="flame">
+            <path id="flame-path" d="M0,0 C-16,28 -14,55 0,78 C14,55 16,28 0,0 Z" fill="url(#flameGrad)"/>
+          </g>
+        </g>
+
+        <!-- left fin -->
+        <g class="anchor" transform="translate(150,300)">
+          <g class="piece" data-piece="fin-left">
+            <path d="M-18,0 L-70,70 L-18,70 Z" fill="#4b4fd6"/>
+          </g>
+        </g>
+
+        <!-- right fin -->
+        <g class="anchor" transform="translate(150,300)">
+          <g class="piece" data-piece="fin-right">
+            <path d="M18,0 L70,70 L18,70 Z" fill="#4b4fd6"/>
+          </g>
+        </g>
+
+        <!-- body -->
+        <g class="anchor" transform="translate(150,210)">
+          <g class="piece" data-piece="body">
+            <rect x="-40" y="0" width="80" height="150" rx="18" fill="url(#bodyGrad)"/>
+          </g>
+        </g>
+
+        <!-- window ring -->
+        <g class="anchor" transform="translate(150,255)">
+          <g class="piece" data-piece="window">
+            <circle r="26" fill="#2b2f77"/>
+            <circle r="20" fill="#8fd7ff"/>
+            <circle r="20" fill="none" stroke="#dff4ff" stroke-width="3"/>
+          </g>
+        </g>
+
+        <!-- nose cone -->
+        <g class="anchor" transform="translate(150,60)">
+          <g class="piece" data-piece="nose">
+            <path d="M0,0 C26,40 40,90 40,150 L-40,150 C-40,90 -26,40 0,0 Z" fill="#ff6b6b"/>
+          </g>
+        </g>
+
+        <!-- top tip badge -->
+        <g class="anchor" transform="translate(150,55)">
+          <g class="piece" data-piece="tip">
+            <circle r="7" fill="#ffd93d"/>
+          </g>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <section class="how" id="como-funciona">
+    <h2>Como o Orbital monta cada avaliação</h2>
+    <div class="steps">
+      <div class="step">
+        <span class="step-num">01</span>
+        <h3>Banco de questões</h3>
+        <p>Organizado por disciplina, matéria, dificuldade e Taxonomia de Bloom.</p>
+      </div>
+      <div class="step">
+        <span class="step-num">02</span>
+        <h3>Montagem automática</h3>
+        <p>O professor escolhe critérios e o Orbital monta a prova, peça por peça.</p>
+      </div>
+      <div class="step">
+        <span class="step-num">03</span>
+        <h3>Distribuição no Classroom</h3>
+        <p>Cada aluno recebe uma versão embaralhada, com link direto na atividade.</p>
+      </div>
+      <div class="step">
+        <span class="step-num">04</span>
+        <h3>Correção automática</h3>
+        <p>Questões objetivas corrigidas na hora, sem esforço manual.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="features" id="recursos">
+    <h2>Recursos a bordo</h2>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <h3>Integração real com Classroom</h3>
+        <p>Login OAuth2, importação de turmas e alunos direto da conta Google.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Provas únicas por aluno</h3>
+        <p>Questões e alternativas embaralhadas — evita cola sem perder consistência na correção.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Cronômetro e progresso</h3>
+        <p>Tela de aviso, cronômetro contínuo e visão geral do progresso durante a prova.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta" id="cta">
+    <h2>Pronto para o lançamento?</h2>
+    <p>Leve suas avaliações para o Orbital e deixe a correção decolar.</p>
+    <a class="btn btn-primary" href="#">Falar com o time</a>
+  </section>
+</main>
+
+<footer>
+  <p>Orbital — plataforma de avaliações digitais. Página de estudo inspirada no animejs.com.</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/animejs@3.2.2/lib/anime.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

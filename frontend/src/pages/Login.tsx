@@ -90,6 +90,7 @@ export default function Login() {
             Entrar com Google Sala de Aula
           </Button>
 
+
           <p className="mt-8 text-center text-xs text-neutral-500">
             Ainda não tem conta?{" "}
             <a href="#" className="text-white transition-colors hover:text-orange-400">

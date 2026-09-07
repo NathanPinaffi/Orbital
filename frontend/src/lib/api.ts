@@ -166,6 +166,7 @@ export interface Question {
   bank: QuestionBankLite;
   graph: QuestionGraph | null;
   requiresSketch: boolean;
+  tikz: string | null;
 }
 
 export type QuestionInput =
@@ -180,6 +181,7 @@ export type QuestionInput =
       alternatives: { content: string; isCorrect: boolean }[];
       graph?: QuestionGraph | null;
       requiresSketch?: boolean;
+      tikz?: string | null;
     }
   | {
       type: "TRUE_FALSE";
@@ -192,6 +194,7 @@ export type QuestionInput =
       correctAnswer: boolean;
       graph?: QuestionGraph | null;
       requiresSketch?: boolean;
+      tikz?: string | null;
     }
   | {
       type: "ESSAY";
@@ -203,6 +206,7 @@ export type QuestionInput =
       bloomLevel: BloomLevel;
       graph?: QuestionGraph | null;
       requiresSketch?: boolean;
+      tikz?: string | null;
     };
 
 export function fetchQuestionBanks(): Promise<{ mine: QuestionBankSummary[]; public: QuestionBankSummary[] }> {
@@ -348,6 +352,7 @@ export interface ExamQuestion {
   alternatives: ExamAlternative[];
   graph: QuestionGraph | null;
   requiresSketch: boolean;
+  tikz: string | null;
 }
 
 export type ExamState =
@@ -450,6 +455,7 @@ export interface GradingQuestion {
   answer: GradingAnswer | null;
   graph: QuestionGraph | null;
   requiresSketch: boolean;
+  tikz: string | null;
 }
 
 export interface SubmissionDetail {

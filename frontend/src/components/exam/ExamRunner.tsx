@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ClockIcon } from "../ui/dashboardIcons";
 import { MathText } from "../common/MathText";
 import { FunctionGraph } from "../common/FunctionGraph";
+import { TikzFigure } from "../common/TikzFigure";
 import { SketchPad } from "../common/SketchPad";
 import { RestScreen } from "./RestScreen";
 import type { ExamQuestion, Stroke } from "../../lib/api";
@@ -193,6 +194,7 @@ export function ExamRunner({
             </p>
 
             {q.graph && <FunctionGraph spec={q.graph} className="mb-5" />}
+            {q.tikz && <TikzFigure source={q.tikz} className="mb-5" />}
 
             {q.type === "ESSAY" ? (
               <div className="space-y-3">

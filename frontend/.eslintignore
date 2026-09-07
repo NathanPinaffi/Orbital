@@ -1,0 +1,3 @@
+# Distribuição de terceiros (TikZJax), vendorizada em public/ pra ser servida como asset
+# estático — não é código do projeto, não faz sentido lintar.
+public/tikzjax

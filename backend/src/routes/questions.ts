@@ -29,6 +29,7 @@ const baseFields = {
   bloomLevel: bloomLevelSchema,
   graph: graphSchema.nullable().optional(),
   requiresSketch: z.boolean().optional().default(false),
+  tikz: z.string().trim().min(1).nullable().optional(),
 };
 
 const questionSchema = z.discriminatedUnion("type", [
@@ -152,6 +153,7 @@ questionsRouter.post("/", async (req: AuthedRequest, res, next) => {
         graphYMin: body.graph?.yMin ?? null,
         graphYMax: body.graph?.yMax ?? null,
         requiresSketch: body.requiresSketch,
+        tikz: body.tikz ?? null,
         alternatives: { create: alternativesForCreate(body) },
       },
       include: { alternatives: true },
@@ -201,6 +203,7 @@ questionsRouter.put("/:id", async (req: AuthedRequest, res, next) => {
           graphYMin: body.graph?.yMin ?? null,
           graphYMax: body.graph?.yMax ?? null,
           requiresSketch: body.requiresSketch,
+          tikz: body.tikz ?? null,
           alternatives: { create: alternativesForCreate(body) },
         },
         include: { alternatives: true },

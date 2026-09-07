@@ -132,6 +132,7 @@ model Question {
   graphYMin       Float?
   graphYMax       Float?
   requiresSketch  Boolean @default(false)
+  tikz            String?
 
   alternatives     Alternative[]
   assessmentLinks  AssessmentQuestion[]

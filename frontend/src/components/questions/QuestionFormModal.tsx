@@ -1,7 +1,8 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { PlusIcon, TrashIcon, XIcon } from "../ui/dashboardIcons";
 import { MathText } from "../common/MathText";
 import { FunctionGraph } from "../common/FunctionGraph";
+import { TikzFigure } from "../common/TikzFigure";
 import type { BloomLevel, Difficulty, Question, QuestionInput, QuestionType } from "../../lib/api";
 
 const DIFFICULTY_LABEL: Record<Difficulty, string> = {
@@ -76,6 +77,18 @@ export function QuestionFormModal({
   const [graphYMin, setGraphYMin] = useState(question?.graph?.yMin ?? -10);
   const [graphYMax, setGraphYMax] = useState(question?.graph?.yMax ?? 10);
   const [requiresSketch, setRequiresSketch] = useState(question?.requiresSketch ?? false);
+  const [tikzEnabled, setTikzEnabled] = useState(question?.tikz != null);
+  const [tikzSource, setTikzSource] = useState(
+    question?.tikz ?? "\\begin{tikzpicture}\n  \\draw (0,0) circle (1cm);\n\\end{tikzpicture}",
+  );
+  // A compilação do TikZ roda um TeX de verdade (WASM) e não é instantânea — recompilar a
+  // cada tecla digitada travaria o formulário. Só atualiza a pré-visualização depois de meio
+  // segundo sem o professor digitar.
+  const [tikzPreview, setTikzPreview] = useState(tikzSource);
+  useEffect(() => {
+    const timer = setTimeout(() => setTikzPreview(tikzSource), 500);
+    return () => clearTimeout(timer);
+  }, [tikzSource]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -118,6 +131,11 @@ export function QuestionFormModal({
       }
     }
 
+    if (tikzEnabled && !tikzSource.trim()) {
+      setError("Digite o código TikZ da figura ou desative essa opção.");
+      return;
+    }
+
     const graph = graphEnabled
       ? { expression: graphExpression.trim(), xMin: graphXMin, xMax: graphXMax, yMin: graphYMin, yMax: graphYMax }
       : null;
@@ -131,6 +149,7 @@ export function QuestionFormModal({
       bloomLevel,
       graph,
       requiresSketch: type === "ESSAY" && requiresSketch,
+      tikz: tikzEnabled ? tikzSource.trim() : null,
     };
     let input: QuestionInput;
 
@@ -332,6 +351,37 @@ export function QuestionFormModal({
                       spec={{ expression: graphExpression, xMin: graphXMin, xMax: graphXMax, yMin: graphYMin, yMax: graphYMax }}
                     />
                   )}
+                </div>
+              )}
+            </div>
+
+            <div className="rounded-lg border border-white/10 bg-white/[0.02] p-3">
+              <label className="flex items-center gap-2 text-xs text-neutral-300">
+                <input
+                  type="checkbox"
+                  checked={tikzEnabled}
+                  onChange={(e) => setTikzEnabled(e.target.checked)}
+                  className="h-3.5 w-3.5 shrink-0 rounded border-white/20 bg-transparent accent-orange-500 text-orange-500 focus:ring-0"
+                />
+                Incluir figura desenhada em TikZ (geometria, diagramas, plots...)
+              </label>
+
+              {tikzEnabled && (
+                <div className="mt-3 space-y-2">
+                  <Field label="Código TikZ">
+                    <textarea
+                      className={`${inputClass} min-h-32 resize-y font-mono text-xs`}
+                      value={tikzSource}
+                      onChange={(e) => setTikzSource(e.target.value)}
+                      placeholder={"\\begin{tikzpicture}\n  \\draw (0,0) -- (2,0) -- (1,1.5) -- cycle;\n\\end{tikzpicture}"}
+                      spellCheck={false}
+                    />
+                  </Field>
+                  <p className="text-[11px] text-neutral-600">
+                    Cole o conteúdo de um <code className="text-neutral-500">tikzpicture</code>. A compilação roda no
+                    navegador (pode levar alguns segundos na primeira vez).
+                  </p>
+                  {tikzPreview.trim() && <TikzFigure source={tikzPreview} />}
                 </div>
               )}
             </div>

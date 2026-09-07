@@ -182,9 +182,9 @@ export function QuestionFormModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/70 px-3 py-6 backdrop-blur-sm sm:px-4 sm:py-8">
-      <div className="electric-card relative w-full max-w-xl overflow-hidden rounded-[24px] bg-neutral-900 p-[2px] sm:rounded-[28px]">
+      <div className="electric-card relative w-full max-w-xl overflow-hidden rounded-[24px] bg-neutral-900 p-[2px] sm:max-w-[80vw] sm:rounded-[28px]">
         <div className="absolute inset-0 z-0 bg-gradient-to-b from-yellow-300 via-orange-500 to-transparent opacity-60" />
-        <div className="relative z-10 max-h-[85vh] overflow-y-auto rounded-[22px] bg-[#0A0A0A] p-5 sm:rounded-[26px] sm:p-8">
+        <div className="relative z-10 max-h-[80vh] overflow-y-auto rounded-[22px] bg-[#0A0A0A] p-5 sm:rounded-[26px] sm:p-8">
           <div className="mb-6 flex items-center justify-between">
             <h2 className="font-bricolage text-xl font-light tracking-tight text-white">
               {question ? "Editar questão" : "Nova questão"}

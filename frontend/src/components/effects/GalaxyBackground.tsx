@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useLayoutEffect, useRef } from "react";
 import { secureRandom } from "../../lib/random";
 
 interface Star {
@@ -60,7 +60,14 @@ export function GalaxyBackground({
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  useEffect(() => {
+  // useLayoutEffect (não useEffect) é essencial aqui: o <canvas> nasce com o buffer
+  // default do navegador (300x150) até que resize() rode. Com useEffect isso pode ser
+  // pintado na tela antes do resize rodar — e como o CSS força o canvas a preencher
+  // 100% da largura/altura, o navegador estica esse buffer 300x150 pra caber, distorcendo
+  // as estrelas/planetas por um frame. Em celulares (CPU mais lenta, mais chance desse
+  // frame ficar visível) é exatamente esse "distorcido" que aparece. useLayoutEffect roda
+  // de forma síncrona antes do navegador pintar, então o buffer já nasce no tamanho certo.
+  useLayoutEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
     if (!canvas || !ctx) return;
@@ -271,6 +278,11 @@ export function GalaxyBackground({
     }
 
     window.addEventListener("resize", resize);
+    // Em alguns navegadores mobile (principalmente Safari/iOS mais antigos) o evento
+    // "resize" não dispara de forma confiável ao girar a tela — sem "orientationchange"
+    // o canvas pode ficar com o buffer da orientação anterior esticado pro novo tamanho,
+    // distorcendo o desenho até o próximo resize real.
+    window.addEventListener("orientationchange", resize);
     window.addEventListener("pointermove", handlePointerMove);
     window.addEventListener("pointerleave", handlePointerLeave);
     document.addEventListener("visibilitychange", handleVisibilityChange);
@@ -278,6 +290,7 @@ export function GalaxyBackground({
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", resize);
+      window.removeEventListener("orientationchange", resize);
       window.removeEventListener("pointermove", handlePointerMove);
       window.removeEventListener("pointerleave", handlePointerLeave);
       document.removeEventListener("visibilitychange", handleVisibilityChange);

@@ -77,7 +77,7 @@ export function Sidebar({
         }`}
       >
         <div className="mb-10 flex items-center justify-between px-2">
-          <img src={logo} alt="Orbital" className="h-10 w-auto md:h-14" />
+          <img src={logo} alt="Orbital" width={600} height={193} className="h-10 w-auto md:h-14" />
           <button onClick={onClose} className="text-neutral-500 hover:text-white md:hidden" aria-label="Fechar menu">
             <XIcon className="h-5 w-5" />
           </button>

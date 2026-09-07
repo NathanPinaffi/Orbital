@@ -27,7 +27,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <div className="relative z-10 flex min-w-0 flex-1 flex-col">
         <header className="flex items-center justify-between border-b border-white/5 bg-white/[0.02] px-4 py-3 backdrop-blur-xl md:hidden">
-          <img src={logo} alt="Orbital" className="h-8 w-auto" />
+          <img src={logo} alt="Orbital" width={600} height={193} className="h-8 w-auto" />
           <button
             onClick={() => setMobileNavOpen(true)}
             className="rounded-lg border border-white/10 p-2 text-neutral-300 hover:text-white"

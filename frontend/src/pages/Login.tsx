@@ -57,11 +57,26 @@ export default function Login() {
   return (
     <AuthBackground>
       <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center">
-        <img ref={splashLogoRef} src={logo} alt="Orbital" className="h-16 w-auto rounded-md" />
+        <img
+          ref={splashLogoRef}
+          src={logo}
+          alt="Orbital"
+          width={600}
+          height={193}
+          fetchPriority="high"
+          className="h-16 w-auto rounded-md"
+        />
       </div>
 
       <div className="mb-8 sm:mb-10">
-        <img ref={finalLogoRef} src={logo} alt="Orbital" className="h-14 w-auto max-w-full rounded-md sm:h-20 md:h-24" />
+        <img
+          ref={finalLogoRef}
+          src={logo}
+          alt="Orbital"
+          width={600}
+          height={193}
+          className="h-14 w-auto max-w-full rounded-md sm:h-20 md:h-24"
+        />
       </div>
 
       <div

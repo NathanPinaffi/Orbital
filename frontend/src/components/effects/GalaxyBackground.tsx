@@ -67,7 +67,13 @@ export function GalaxyBackground({
 
     let width = 0;
     let height = 0;
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    // Em telas pequenas capamos o DPR em 1 (celulares costumam ter DPR 2-3, o que
+    // quadruplica/nonuplica os pixels a preencher a cada frame sem ganho visual perceptível
+    // num fundo decorativo) e reduzimos a densidade — menos estrelas/planetas pra desenhar.
+    const isSmallScreen = window.matchMedia("(max-width: 640px)").matches;
+    const dpr = Math.min(window.devicePixelRatio || 1, isSmallScreen ? 1 : 2);
+    const effectiveDensity = isSmallScreen ? density * 0.4 : density;
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const pointer = { x: 0, y: 0 };
     const current = { x: 0, y: 0 };
 
@@ -80,7 +86,7 @@ export function GalaxyBackground({
       ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
 
-    const count = Math.round(480 * density);
+    const count = Math.round(480 * effectiveDensity);
     const stars: Star[] = Array.from({ length: count }, () => ({
       x: secureRandom() * 2 - 1,
       y: secureRandom() * 2 - 1,
@@ -92,7 +98,7 @@ export function GalaxyBackground({
       hue: secureRandom() < 0.14 ? "warm" : secureRandom() < 0.06 ? "cool" : "white",
     }));
 
-    const planetCount = Math.max(2, Math.round(2 * density));
+    const planetCount = Math.max(2, Math.round(2 * effectiveDensity));
     const planets: Planet[] = Array.from({ length: planetCount }, () => {
       const palette = PLANET_PALETTE[Math.floor(secureRandom() * PLANET_PALETTE.length)];
       return {
@@ -175,9 +181,10 @@ export function GalaxyBackground({
         const px = cx + p.x * maxDim + current.x * p.depth * 46 + wobbleX;
         const py = cy + p.y * maxDim + current.y * p.depth * 46 + wobbleY;
 
-        ctx!.save();
-        ctx!.filter = `blur(${p.radius * 0.05}px)`;
-
+        // ctx.filter = blur(...) por planeta por frame é bastante caro (principalmente em
+        // Safari/iOS mobile). Um gradiente radial com uma borda semi-transparente dá o mesmo
+        // efeito de "borrado" visualmente sem forçar o navegador a rodar um blur de pixel a
+        // cada frame.
         if (p.ringColor) {
           ctx!.save();
           ctx!.translate(px, py);
@@ -191,12 +198,14 @@ export function GalaxyBackground({
           ctx!.restore();
         }
 
+        const glow = ctx!.createRadialGradient(px, py, 0, px, py, p.radius);
+        glow.addColorStop(0, `rgba(${p.color},0.85)`);
+        glow.addColorStop(0.85, `rgba(${p.color},0.85)`);
+        glow.addColorStop(1, `rgba(${p.color},0)`);
         ctx!.beginPath();
-        ctx!.fillStyle = `rgba(${p.color},0.85)`;
+        ctx!.fillStyle = glow;
         ctx!.arc(px, py, p.radius, 0, Math.PI * 2);
         ctx!.fill();
-
-        ctx!.restore();
       }
 
       framesUntilNextComet -= 1;
@@ -238,21 +247,40 @@ export function GalaxyBackground({
         return true;
       });
 
-      raf = requestAnimationFrame(frame);
+      if (!document.hidden) raf = requestAnimationFrame(frame);
+    }
+
+    function handleVisibilityChange() {
+      // Sem isso o canvas continua sendo redesenhado a 60fps com a aba em segundo
+      // plano ou o celular com a tela apagada, gastando bateria/CPU à toa.
+      if (document.hidden) {
+        cancelAnimationFrame(raf);
+      } else {
+        cancelAnimationFrame(raf);
+        raf = requestAnimationFrame(frame);
+      }
     }
 
     resize();
-    frame();
+    if (prefersReducedMotion) {
+      // Desenha um único frame estático em vez de animar indefinidamente.
+      frame();
+      cancelAnimationFrame(raf);
+    } else {
+      frame();
+    }
 
     window.addEventListener("resize", resize);
     window.addEventListener("pointermove", handlePointerMove);
     window.addEventListener("pointerleave", handlePointerLeave);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", resize);
       window.removeEventListener("pointermove", handlePointerMove);
       window.removeEventListener("pointerleave", handlePointerLeave);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [density]);
 

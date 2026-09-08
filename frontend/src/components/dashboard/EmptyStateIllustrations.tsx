@@ -56,13 +56,6 @@ export function RocketRestingIllustration({ className = "h-24 w-24" }: Illustrat
       strokeLinejoin="round"
     />
 
-    <path
-      d="M22 55c-5 2-7 4-7 8s2 6 7 8"
-      className="fill-white/[0.05] stroke-neutral-500"
-      strokeWidth="1.5"
-      strokeLinejoin="round"
-    />
-
     <text
       x="82"
       y="40"
@@ -131,15 +124,17 @@ export function RocketFuelingIllustration({ className = "h-24 w-24" }: Illustrat
         strokeLinejoin="round"
       />
 
-      {/* mangueira de abastecimento saindo do tanque no chão até o foguete */}
+      {/* mangueira de abastecimento saindo do tanque no chão até o bocal do foguete */}
       <path
-        d="M96 84c0-8-4-10-8-10s-6 3-6 6c-3-4-9-4-12 0-9-2-14 4-14 10"
+        d="M92 80c-9 1-16-2-22-8-5-5-11-6-16-4"
         className="stroke-orange-400/70"
         strokeWidth="2"
         strokeLinecap="round"
+        fill="none"
       />
       <rect x="90" y="78" width="10" height="14" rx="2" className="fill-white/[0.05] stroke-neutral-500" strokeWidth="1.3" />
       <path d="M92 82h6M92 86h6" className="stroke-neutral-600" strokeWidth="1" strokeLinecap="round" />
+      <circle cx="54" cy="68" r="2" className="fill-orange-400/70 stroke-orange-400" strokeWidth="1" />
 
       {/* gotas de combustível subindo até o bocal na lateral do foguete */}
       <circle cx="54" cy="60" r="1.6" className="fill-orange-400/70" />

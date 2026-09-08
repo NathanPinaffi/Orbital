@@ -7,7 +7,7 @@ import { ConfirmModal } from "../components/grading/ConfirmModal";
 import { EssayGrader } from "../components/grading/EssayGrader";
 import { MathText } from "../components/common/MathText";
 import { FunctionGraph } from "../components/common/FunctionGraph";
-import { TikzFigure } from "../components/common/TikzFigure";
+import { TikzStatic } from "../components/common/TikzStatic";
 import { useGsapEntrance } from "../hooks/useGsapEntrance";
 import { initials } from "../hooks/useMe";
 import {
@@ -159,7 +159,7 @@ export default function GradeSubmission() {
                   </p>
 
                   {q.graph && <FunctionGraph spec={q.graph} className="mb-3" />}
-                  {q.tikz && <TikzFigure source={q.tikz} className="mb-3" />}
+                  {q.tikz && <TikzStatic svg={q.tikzSvg} source={q.tikz} className="mb-3" />}
 
                   {q.type === "ESSAY" ? (
                     <EssayGrader question={q} onSave={(points, comment) => handleGrade(q.questionId, q.answer!.id, points, comment)} />

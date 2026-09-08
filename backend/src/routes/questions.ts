@@ -30,6 +30,10 @@ const baseFields = {
   graph: graphSchema.nullable().optional(),
   requiresSketch: z.boolean().optional().default(false),
   tikz: z.string().trim().min(1).nullable().optional(),
+  // SVG já compilado no navegador do professor (TikZJax) no momento em que salvou a
+  // figura — evita recompilar o TeX toda vez que a questão aparece pra alguém (banco,
+  // prova, correção). Se vier vazio/nulo, as telas caem no fallback de compilar na hora.
+  tikzSvg: z.string().trim().min(1).nullable().optional(),
 };
 
 const questionSchema = z.discriminatedUnion("type", [
@@ -154,6 +158,7 @@ questionsRouter.post("/", async (req: AuthedRequest, res, next) => {
         graphYMax: body.graph?.yMax ?? null,
         requiresSketch: body.requiresSketch,
         tikz: body.tikz ?? null,
+        tikzSvg: body.tikz ? body.tikzSvg ?? null : null,
         alternatives: { create: alternativesForCreate(body) },
       },
       include: { alternatives: true },
@@ -204,6 +209,7 @@ questionsRouter.put("/:id", async (req: AuthedRequest, res, next) => {
           graphYMax: body.graph?.yMax ?? null,
           requiresSketch: body.requiresSketch,
           tikz: body.tikz ?? null,
+          tikzSvg: body.tikz ? body.tikzSvg ?? null : null,
           alternatives: { create: alternativesForCreate(body) },
         },
         include: { alternatives: true },

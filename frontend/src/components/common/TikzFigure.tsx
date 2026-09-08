@@ -34,7 +34,16 @@ function loadTikzJax(): Promise<void> {
 // um mecanismo de "libraries" por trás.
 const DEFAULT_LIBRARIES = "arrows.meta,calc,positioning,angles,quotes,patterns,decorations.pathmorphing";
 
-export function TikzFigure({ source, className }: { source: string; className?: string }) {
+export function TikzFigure({
+  source,
+  className,
+  onRendered,
+}: {
+  source: string;
+  className?: string;
+  /** Chamado com o SVG final assim que a compilação termina, pra quem quiser cachear e evitar recompilar depois. */
+  onRendered?: (svg: string) => void;
+}) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
 
@@ -63,7 +72,10 @@ export function TikzFigure({ source, className }: { source: string; className?: 
 
   useEffect(() => {
     function onFinished(e: Event) {
-      if (containerRef.current?.contains(e.target as Node)) setStatus("ready");
+      if (!containerRef.current?.contains(e.target as Node)) return;
+      setStatus("ready");
+      const svg = containerRef.current.querySelector("svg");
+      if (svg) onRendered?.(svg.outerHTML);
     }
     function onError(e: Event) {
       if (containerRef.current?.contains(e.target as Node)) setStatus("error");
@@ -74,7 +86,7 @@ export function TikzFigure({ source, className }: { source: string; className?: 
       document.removeEventListener("tikzjax-load-finished", onFinished);
       document.removeEventListener("tikzjax-error", onError);
     };
-  }, []);
+  }, [onRendered]);
 
   return (
     <div

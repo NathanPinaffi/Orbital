@@ -101,6 +101,7 @@ examsRouter.get("/:assessmentId", async (req: AuthedRequest, res, next) => {
         alternatives,
         requiresSketch: aq.question.requiresSketch,
         tikz: aq.question.tikz,
+        tikzSvg: aq.question.tikzSvg,
         graph:
           aq.question.graphExpression != null
             ? {

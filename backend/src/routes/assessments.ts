@@ -272,6 +272,7 @@ assessmentsRouter.get("/:assessmentId/submissions/:submissionId", async (req: Au
         alternatives: aq.question.alternatives.map((alt) => ({ id: alt.id, content: alt.content, isCorrect: alt.isCorrect })),
         requiresSketch: aq.question.requiresSketch,
         tikz: aq.question.tikz,
+        tikzSvg: aq.question.tikzSvg,
         graph:
           aq.question.graphExpression != null
             ? {

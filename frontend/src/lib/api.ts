@@ -167,6 +167,7 @@ export interface Question {
   graph: QuestionGraph | null;
   requiresSketch: boolean;
   tikz: string | null;
+  tikzSvg: string | null;
 }
 
 export type QuestionInput =
@@ -182,6 +183,7 @@ export type QuestionInput =
       graph?: QuestionGraph | null;
       requiresSketch?: boolean;
       tikz?: string | null;
+      tikzSvg?: string | null;
     }
   | {
       type: "TRUE_FALSE";
@@ -195,6 +197,7 @@ export type QuestionInput =
       graph?: QuestionGraph | null;
       requiresSketch?: boolean;
       tikz?: string | null;
+      tikzSvg?: string | null;
     }
   | {
       type: "ESSAY";
@@ -207,6 +210,7 @@ export type QuestionInput =
       graph?: QuestionGraph | null;
       requiresSketch?: boolean;
       tikz?: string | null;
+      tikzSvg?: string | null;
     };
 
 export function fetchQuestionBanks(): Promise<{ mine: QuestionBankSummary[]; public: QuestionBankSummary[] }> {
@@ -353,6 +357,7 @@ export interface ExamQuestion {
   graph: QuestionGraph | null;
   requiresSketch: boolean;
   tikz: string | null;
+  tikzSvg: string | null;
 }
 
 export type ExamState =
@@ -456,6 +461,7 @@ export interface GradingQuestion {
   graph: QuestionGraph | null;
   requiresSketch: boolean;
   tikz: string | null;
+  tikzSvg: string | null;
 }
 
 export interface SubmissionDetail {

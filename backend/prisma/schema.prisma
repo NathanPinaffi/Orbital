@@ -133,6 +133,7 @@ model Question {
   graphYMax       Float?
   requiresSketch  Boolean @default(false)
   tikz            String?
+  tikzSvg         String?
 
   alternatives     Alternative[]
   assessmentLinks  AssessmentQuestion[]

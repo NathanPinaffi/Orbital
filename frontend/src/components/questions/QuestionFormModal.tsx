@@ -4,6 +4,7 @@ import { Select } from "../ui/Select";
 import { MathText } from "../common/MathText";
 import { FunctionGraph } from "../common/FunctionGraph";
 import { TikzFigure } from "../common/TikzFigure";
+import { TikzStatic } from "../common/TikzStatic";
 import type { BloomLevel, Difficulty, Question, QuestionInput, QuestionType } from "../../lib/api";
 
 const DIFFICULTY_LABEL: Record<Difficulty, string> = {
@@ -90,6 +91,13 @@ export function QuestionFormModal({
     const timer = setTimeout(() => setTikzPreview(tikzSource), 500);
     return () => clearTimeout(timer);
   }, [tikzSource]);
+  // Guarda o SVG já compilado pra essa mesma pré-visualização, junto do texto a que ele
+  // corresponde — assim, ao salvar, só reaproveitamos o SVG se ele bater exatamente com o
+  // código atual (senão mandamos null e quem for exibir a questão compila na hora, uma
+  // única vez, até o professor editar de novo e recompilar aqui).
+  const [compiledSvg, setCompiledSvg] = useState<{ source: string; svg: string } | null>(
+    question?.tikz && question.tikzSvg ? { source: question.tikz, svg: question.tikzSvg } : null,
+  );
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -151,6 +159,7 @@ export function QuestionFormModal({
       graph,
       requiresSketch: type === "ESSAY" && requiresSketch,
       tikz: tikzEnabled ? tikzSource.trim() : null,
+      tikzSvg: tikzEnabled && compiledSvg?.source === tikzSource.trim() ? compiledSvg.svg : null,
     };
     let input: QuestionInput;
 
@@ -370,7 +379,15 @@ export function QuestionFormModal({
                     Cole o conteúdo de um <code className="text-neutral-500">tikzpicture</code>. A compilação roda no
                     navegador (pode levar alguns segundos na primeira vez).
                   </p>
-                  {tikzPreview.trim() && <TikzFigure source={tikzPreview} />}
+                  {tikzPreview.trim() &&
+                    (compiledSvg?.source === tikzPreview ? (
+                      <TikzStatic svg={compiledSvg.svg} source={tikzPreview} />
+                    ) : (
+                      <TikzFigure
+                        source={tikzPreview}
+                        onRendered={(svg) => setCompiledSvg({ source: tikzPreview, svg })}
+                      />
+                    ))}
                 </div>
               )}
             </div>

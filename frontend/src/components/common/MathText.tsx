@@ -45,7 +45,13 @@ export function MathText({ text, className }: { text: string; className?: string
           html = seg.text;
         }
         const Tag = seg.block ? "div" : "span";
-        return <Tag key={i} className={seg.block ? "my-1" : undefined} dangerouslySetInnerHTML={{ __html: html }} />;
+        return (
+          <Tag
+            key={i}
+            className={seg.block ? "my-2" : "mx-0.5"}
+            dangerouslySetInnerHTML={{ __html: html }}
+          />
+        );
       })}
     </span>
   );

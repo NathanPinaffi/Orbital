@@ -343,7 +343,7 @@ export default function QuestionBank() {
         {status === "ready" && questions.length > 0 && (
           <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
             {filtered.map((q) => (
-              <GlassCard key={q.id} data-animate className="flex flex-col gap-[18px] px-5 py-[30px]">
+              <GlassCard key={q.id} data-animate className="flex flex-col gap-2 px-5 py-[30px] sm:gap-[18px]">
                 <div className="flex items-start justify-between gap-2">
                   <span className={`rounded-md px-1.5 py-0.5 text-[10px] uppercase ring-1 ${TYPE_STYLE[q.type]}`}>
                     {TYPE_LABEL[q.type]}

@@ -1,3 +1,5 @@
+import { useId } from "react";
+
 type IllustrationProps = { className?: string };
 
 // Ilustrações usadas nos estados vazios dos cards do dashboard. Maiores e mais
@@ -59,9 +61,10 @@ export function RocketRestingIllustration({ className = "h-24 w-24" }: Illustrat
     <text
       x="82"
       y="40"
-      className="fill-neutral-500"
+      className="rocket-z fill-neutral-500"
       fontSize="11"
       fontFamily="inherit"
+      style={{ animationDelay: "0s" }}
     >
       z
     </text>
@@ -69,9 +72,10 @@ export function RocketRestingIllustration({ className = "h-24 w-24" }: Illustrat
     <text
       x="90"
       y="30"
-      className="fill-neutral-600"
+      className="rocket-z fill-neutral-600"
       fontSize="8"
       fontFamily="inherit"
+      style={{ animationDelay: "0.8s" }}
     >
       z
     </text>
@@ -79,9 +83,10 @@ export function RocketRestingIllustration({ className = "h-24 w-24" }: Illustrat
     <text
       x="96"
       y="22"
-      className="fill-neutral-700"
+      className="rocket-z fill-neutral-700"
       fontSize="6"
       fontFamily="inherit"
+      style={{ animationDelay: "1.6s" }}
     >
       z
     </text>
@@ -92,8 +97,15 @@ export function RocketRestingIllustration({ className = "h-24 w-24" }: Illustrat
 // "Atividades recentes" vazio: nenhuma prova criada ainda, o foguete está sendo
 // abastecido, pronto pra decolar assim que a primeira avaliação for criada.
 export function RocketFuelingIllustration({ className = "h-24 w-24" }: IllustrationProps) {
+  const clipId = useId();
   return (
     <svg viewBox="0 0 120 100" className={className} fill="none">
+      <defs>
+        <clipPath id={clipId}>
+          <circle cx="52" cy="38" r="5.5" />
+        </clipPath>
+      </defs>
+
       {/* plataforma */}
       <rect x="30" y="82" width="44" height="4" rx="1.5" className="fill-white/[0.05]" />
       <rect x="24" y="86" width="56" height="3" rx="1.5" className="fill-white/[0.03]" />
@@ -105,6 +117,13 @@ export function RocketFuelingIllustration({ className = "h-24 w-24" }: Illustrat
         strokeWidth="1.5"
       />
       <circle cx="52" cy="38" r="5.5" className="fill-orange-500/15 stroke-orange-400" strokeWidth="1.5" />
+      {/* preenchimento da janela subindo conforme o combustível entra */}
+      <rect
+        x="46.5"
+        width="11"
+        clipPath={`url(#${clipId})`}
+        className="rocket-window-fill fill-orange-400"
+      />
       <path
         d="M36 46c-6 1-9 6-9 12 4-2 8-3 11-2Z"
         className="fill-white/[0.05] stroke-neutral-500"

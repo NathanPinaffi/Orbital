@@ -78,6 +78,55 @@ body {
   transform-origin: 50% 0%;
 }
 
+@keyframes rocketWindowFill {
+  0%,
+  8% {
+    y: 43.5px;
+    height: 0px;
+    opacity: 0.9;
+  }
+  55%,
+  82% {
+    y: 32.5px;
+    height: 11px;
+    opacity: 1;
+  }
+  100% {
+    y: 43.5px;
+    height: 0px;
+    opacity: 0.9;
+  }
+}
+
+.rocket-window-fill {
+  animation: rocketWindowFill 3.2s ease-in-out infinite;
+}
+
+@keyframes rocketZFloat {
+  0% {
+    opacity: 0;
+    transform: translateY(4px) scale(0.85);
+  }
+  15% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  80% {
+    opacity: 0.8;
+    transform: translateY(-10px) scale(1.05);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-16px) scale(1.1);
+  }
+}
+
+.rocket-z {
+  animation: rocketZFloat 2.4s ease-in infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
 input:-webkit-autofill {
   -webkit-box-shadow: 0 0 0 1000px #050505 inset !important;
   -webkit-text-fill-color: #fff !important;

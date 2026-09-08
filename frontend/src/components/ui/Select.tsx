@@ -28,7 +28,7 @@ export function Select({
   return (
     <div className={`relative ${className}`}>
       <select
-        className={`w-full min-w-0 cursor-pointer appearance-none rounded-lg border transition-colors focus:border-orange-500/50 focus:outline-none hover:border-white/20 ${sizeClasses[size]}`}
+        className={`w-full min-w-0 cursor-pointer appearance-none rounded-lg border accent-orange-500 [color-scheme:dark] transition-colors focus:border-orange-500/50 focus:outline-none hover:border-white/20 ${sizeClasses[size]}`}
         {...props}
       />
       <ChevronDownIcon

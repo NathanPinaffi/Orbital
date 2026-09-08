@@ -1,4 +1,5 @@
 import PDFDocument from "pdfkit";
+import SVGtoPDF from "svg-to-pdfkit";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { drawRichText } from "./richText.js";
@@ -21,6 +22,11 @@ interface QuestionInput {
   points: number;
   alternatives: AlternativeInput[];
   requiresSketch: boolean;
+  /** SVG já compilado da figura TikZ (cacheado no momento em que o professor salvou a
+   *  questão — ver TikzStatic no frontend). Sem cache, a figura simplesmente não sai
+   *  no PDF, já que o motor TikZJax roda apenas no navegador. */
+  tikz?: string | null;
+  tikzSvg?: string | null;
 }
 
 interface AssessmentPdfInput {
@@ -119,6 +125,11 @@ export function generateAssessmentPdf({
     doc.y = drawRichText(doc, bodyText, MARGIN + prefixWidth, questionTop, usableWidth - prefixWidth, 12, "Times-Roman");
     doc.moveDown(0.4);
 
+    if (question.tikzSvg) {
+      doc.y = drawTikzFigure(doc, question.tikzSvg, MARGIN, doc.y, usableWidth);
+      doc.moveDown(0.4);
+    }
+
     if (question.type === "MULTIPLE_CHOICE" || question.type === "TRUE_FALSE") {
       question.alternatives.forEach((alt, altIndex) => {
         const label = `${LETTERS[altIndex] ?? "?"}) `;
@@ -144,6 +155,46 @@ export function generateAssessmentPdf({
 
   doc.end();
   return doc;
+}
+
+/** Lê width/height do <svg> raiz (TikZJax gera em "pt", já compatível com as coordenadas do PDF). */
+function extractSvgSize(svg: string): { width: number; height: number } | null {
+  const widthMatch = /width="([\d.]+)(?:pt|px)?"/.exec(svg);
+  const heightMatch = /height="([\d.]+)(?:pt|px)?"/.exec(svg);
+  if (!widthMatch || !heightMatch) return null;
+  const width = parseFloat(widthMatch[1]);
+  const height = parseFloat(heightMatch[1]);
+  if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) return null;
+  return { width, height };
+}
+
+/**
+ * Desenha uma figura TikZ já compilada (SVG cacheado, ver Question.tikzSvg), centralizada
+ * e reduzida para caber na largura útil da página. Se o SVG não tiver um viewport legível
+ * ou não couber no restante da página atual, pula para uma nova página antes de desenhar.
+ * Retorna o Y final (abaixo da figura).
+ */
+function drawTikzFigure(doc: PDFKit.PDFDocument, svg: string, x: number, y: number, maxWidth: number): number {
+  const size = extractSvgSize(svg);
+  if (!size) return y;
+
+  const cap = Math.min(maxWidth, 260);
+  const scale = Math.min(1, cap / size.width);
+  const width = size.width * scale;
+  const height = size.height * scale;
+
+  const maxY = doc.page.height - doc.page.margins.bottom;
+  if (y + height > maxY && y > doc.page.margins.top) {
+    doc.addPage();
+    y = doc.y;
+  }
+
+  try {
+    SVGtoPDF(doc, svg, x + (maxWidth - width) / 2, y, { width, height, assumePt: true });
+  } catch {
+    return y;
+  }
+  return y + height + 6;
 }
 
 function drawGradeTable(doc: PDFKit.PDFDocument, questions: QuestionInput[], x: number, width: number) {

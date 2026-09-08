@@ -169,6 +169,8 @@ assessmentsRouter.get("/:assessmentId/pdf", async (req: AuthedRequest, res, next
         points: aq.points,
         alternatives: aq.question.alternatives,
         requiresSketch: aq.question.requiresSketch,
+        tikz: aq.question.tikz,
+        tikzSvg: aq.question.tikzSvg,
       })),
     });
     doc.pipe(res);

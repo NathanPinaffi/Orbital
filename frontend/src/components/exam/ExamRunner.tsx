@@ -182,19 +182,19 @@ export function ExamRunner({
             }}
             className={`p-6 sm:p-8 ${i !== 0 ? "border-t border-white/10" : ""}`}
           >
-            <div className="mb-4 flex items-center gap-2">
+            <div className="mb-5 flex items-center gap-2 sm:mb-4">
               <span className="flex h-6 w-6 items-center justify-center rounded-md bg-orange-500/10 text-[11px] text-orange-400">
                 {i + 1}
               </span>
               <span className="text-[10px] uppercase text-neutral-500">{TYPE_LABEL[q.type]}</span>
             </div>
 
-            <p className="mb-5 text-sm leading-relaxed text-white">
+            <p className="mb-6 text-sm leading-loose text-white sm:mb-5 sm:leading-relaxed">
               <MathText text={q.content} />
             </p>
 
-            {q.graph && <FunctionGraph spec={q.graph} className="mb-5" />}
-            {q.tikz && <TikzStatic svg={q.tikzSvg} source={q.tikz} className="mb-5" />}
+            {q.graph && <FunctionGraph spec={q.graph} className="mb-6 sm:mb-5" />}
+            {q.tikz && <TikzStatic svg={q.tikzSvg} source={q.tikz} className="mb-6 sm:mb-5" />}
 
             {q.type === "ESSAY" ? (
               <div className="space-y-3">

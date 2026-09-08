@@ -368,7 +368,7 @@ export default function QuestionBank() {
                   )}
                 </div>
 
-                <p className="line-clamp-3 text-sm leading-loose text-white sm:leading-normal">
+                <p className="line-clamp-3 text-sm leading-[6] text-white sm:leading-normal">
                   <MathText text={q.content} />
                 </p>
 

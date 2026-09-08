@@ -82,3 +82,28 @@ input:-webkit-autofill {
   -webkit-box-shadow: 0 0 0 1000px #050505 inset !important;
   -webkit-text-fill-color: #fff !important;
 }
+
+/* Scrollbar laranja em toda a aplicação, coerente com a paleta do site. */
+* {
+  scrollbar-color: rgba(249, 115, 22, 0.5) rgba(255, 255, 255, 0.05);
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: rgba(249, 115, 22, 0.5);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(249, 115, 22, 0.8);
+}

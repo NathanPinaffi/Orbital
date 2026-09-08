@@ -175,3 +175,9 @@ export const ShieldAlertIcon = ({ className }: IconProps) => (
     <path d="M12 8v4M12 16h.01" />
   </Svg>
 );
+
+export const ChevronDownIcon = ({ className }: IconProps) => (
+  <Svg className={className}>
+    <path d="m6 9 6 6 6-6" />
+  </Svg>
+);

@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { PlusIcon, TrashIcon, XIcon } from "../ui/dashboardIcons";
+import { Select } from "../ui/Select";
 import { MathText } from "../common/MathText";
 import { FunctionGraph } from "../common/FunctionGraph";
 import { TikzFigure } from "../common/TikzFigure";
@@ -230,45 +231,33 @@ export function QuestionFormModal({
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <Field label="Dificuldade">
-                <select
-                  className={inputClass}
-                  value={difficulty}
-                  onChange={(e) => setDifficulty(e.target.value as Difficulty)}
-                >
+                <Select value={difficulty} onChange={(e) => setDifficulty(e.target.value as Difficulty)}>
                   {Object.entries(DIFFICULTY_LABEL).map(([value, label]) => (
                     <option key={value} value={value}>
                       {label}
                     </option>
                   ))}
-                </select>
+                </Select>
               </Field>
               <Field label="Nível cognitivo (Bloom)">
-                <select
-                  className={inputClass}
-                  value={bloomLevel}
-                  onChange={(e) => setBloomLevel(e.target.value as BloomLevel)}
-                >
+                <Select value={bloomLevel} onChange={(e) => setBloomLevel(e.target.value as BloomLevel)}>
                   {Object.entries(BLOOM_LABEL).map(([value, label]) => (
                     <option key={value} value={value}>
                       {label}
                     </option>
                   ))}
-                </select>
+                </Select>
               </Field>
             </div>
 
             <Field label="Tipo de questão">
-              <select
-                className={inputClass}
-                value={type}
-                onChange={(e) => setType(e.target.value as QuestionType)}
-              >
+              <Select value={type} onChange={(e) => setType(e.target.value as QuestionType)}>
                 {Object.entries(TYPE_LABEL).map(([value, label]) => (
                   <option key={value} value={value}>
                     {label}
                   </option>
                 ))}
-              </select>
+              </Select>
             </Field>
 
             <Field label="Enunciado">

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { AppShell } from "../components/layout/AppShell";
 import { GlassCard } from "../components/dashboard/GlassCard";
 import { PencilIcon, PlusIcon, TrashIcon } from "../components/ui/dashboardIcons";
+import { Select } from "../components/ui/Select";
 import { MathText } from "../components/common/MathText";
 import { FunctionGraph } from "../components/common/FunctionGraph";
 import { TikzFigure } from "../components/common/TikzFigure";
@@ -185,9 +186,6 @@ export default function QuestionBank() {
     loadBanks();
   }
 
-  const selectClass =
-    "rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-neutral-300 focus:border-orange-500/50 focus:outline-none";
-
   return (
     <AppShell>
       <div ref={containerRef}>
@@ -280,8 +278,9 @@ export default function QuestionBank() {
 
         {status === "ready" && questions.length > 0 && (
           <div data-animate className="mb-6 grid grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:gap-3">
-            <select
-              className={`${selectClass} w-full sm:w-auto`}
+            <Select
+              size="sm"
+              className="w-full sm:w-auto"
               value={subjectFilter}
               onChange={(e) => setSubjectFilter(e.target.value)}
             >
@@ -291,9 +290,10 @@ export default function QuestionBank() {
                   {s}
                 </option>
               ))}
-            </select>
-            <select
-              className={`${selectClass} w-full sm:w-auto`}
+            </Select>
+            <Select
+              size="sm"
+              className="w-full sm:w-auto"
               value={topicFilter}
               onChange={(e) => setTopicFilter(e.target.value)}
             >
@@ -303,9 +303,10 @@ export default function QuestionBank() {
                   {t}
                 </option>
               ))}
-            </select>
-            <select
-              className={`${selectClass} w-full sm:w-auto`}
+            </Select>
+            <Select
+              size="sm"
+              className="w-full sm:w-auto"
               value={difficultyFilter}
               onChange={(e) => setDifficultyFilter(e.target.value)}
             >
@@ -315,7 +316,7 @@ export default function QuestionBank() {
                   {label}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
         )}
 

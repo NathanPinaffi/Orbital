@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { XIcon } from "../ui/dashboardIcons";
+import { Select } from "../ui/Select";
 import { MathText } from "../common/MathText";
 import {
   createAssessment,
@@ -244,30 +245,22 @@ export function CreateAssessmentModal({
                     Questões · {selectedQuestionIds.size} selecionada{selectedQuestionIds.size !== 1 && "s"}
                   </label>
                   <div className="grid grid-cols-2 gap-2 sm:flex">
-                    <select
-                      className="min-w-0 rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-[11px] text-neutral-300"
-                      value={subjectFilter}
-                      onChange={(e) => setSubjectFilter(e.target.value)}
-                    >
+                    <Select size="sm" value={subjectFilter} onChange={(e) => setSubjectFilter(e.target.value)}>
                       <option value={ALL}>Todas as disciplinas</option>
                       {subjectOptions.map((s) => (
                         <option key={s} value={s}>
                           {s}
                         </option>
                       ))}
-                    </select>
-                    <select
-                      className="min-w-0 rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-[11px] text-neutral-300"
-                      value={topicFilter}
-                      onChange={(e) => setTopicFilter(e.target.value)}
-                    >
+                    </Select>
+                    <Select size="sm" value={topicFilter} onChange={(e) => setTopicFilter(e.target.value)}>
                       <option value={ALL}>Todas as matérias</option>
                       {topicOptions.map((t) => (
                         <option key={t} value={t}>
                           {t}
                         </option>
                       ))}
-                    </select>
+                    </Select>
                   </div>
                 </div>
 

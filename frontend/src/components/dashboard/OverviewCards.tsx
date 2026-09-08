@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { GlassCard } from "./GlassCard";
 import { ClipboardListIcon, ClockIcon, CalendarIcon } from "../ui/dashboardIcons";
+import { RocketFuelingIllustration, RocketRestingIllustration } from "./EmptyStateIllustrations";
 import type { AssessmentSummary } from "../../lib/api";
 import { timeAgo } from "../../lib/time";
 
@@ -24,7 +25,10 @@ export function RecentActivityCard({ assessments }: { assessments: AssessmentSum
       </div>
 
       {recent.length === 0 ? (
-        <p className="text-sm text-neutral-500">Nenhuma atividade ainda.</p>
+        <div className="flex flex-col items-center gap-3 py-4 text-center">
+          <RocketFuelingIllustration />
+          <p className="text-sm text-neutral-500">Nenhuma atividade ainda.</p>
+        </div>
       ) : (
         <ul className="space-y-2.5">
           {recent.map((a) => (
@@ -67,7 +71,10 @@ export function UpcomingCard({ assessments }: { assessments: AssessmentSummary[]
       </div>
 
       {upcoming.length === 0 ? (
-        <p className="text-sm text-neutral-500">Nenhuma avaliação em aberto no momento.</p>
+        <div className="flex flex-col items-center gap-3 py-4 text-center">
+          <RocketRestingIllustration />
+          <p className="text-sm text-neutral-500">Nenhuma avaliação em aberto no momento.</p>
+        </div>
       ) : (
         <ul className="space-y-2.5">
           {upcoming.map((a) => (

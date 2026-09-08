@@ -7,48 +7,92 @@ type IllustrationProps = { className?: string };
 // "A entregar" vazio: nenhuma prova pendente, o foguete tira uma soneca.
 export function RocketRestingIllustration({ className = "h-24 w-24" }: IllustrationProps) {
   return (
-    <svg viewBox="0 0 120 100" className={className} fill="none">
-      {/* chão */}
-      <ellipse cx="52" cy="80" rx="34" ry="4" className="fill-white/[0.04]" />
+    <svg
+    viewBox="0 0 120 100"
+    className={className}
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <ellipse
+      cx="52"
+      cy="80"
+      rx="34"
+      ry="4"
+      className="fill-white/[0.04]"
+    />
 
-      {/* foguete deitado de lado, "dormindo" */}
-      <path
-        d="M30 62c0-9 14-16 28-16 8 0 14 3 14 16s-6 16-14 16c-14 0-28-7-28-16Z"
-        className="fill-white/[0.05] stroke-neutral-500"
-        strokeWidth="1.5"
-      />
-      <path d="M30 62c6-4 14-6 20-6" className="stroke-neutral-600" strokeWidth="1.2" strokeLinecap="round" />
-      <circle cx="52" cy="62" r="5" className="fill-orange-500/15 stroke-orange-400" strokeWidth="1.5" />
-      <path
-        d="M46 47c1-6 6-9 11-9-2 4-3 8-2 11Z"
-        className="fill-white/[0.05] stroke-neutral-500"
-        strokeWidth="1.5"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M46 77c1 6 6 9 11 9-2-4-3-8-2-11Z"
-        className="fill-white/[0.05] stroke-neutral-500"
-        strokeWidth="1.5"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M22 55c-5 2-7 4-7 8s2 6 7 8"
-        className="fill-white/[0.05] stroke-neutral-500"
-        strokeWidth="1.5"
-        strokeLinejoin="round"
-      />
+    <path
+      d="M30 62c0-9 14-16 28-16 8 0 14 3 14 16s-6 16-14 16c-14 0-28-7-28-16Z"
+      className="fill-white/[0.05] stroke-neutral-500"
+      strokeWidth="1.5"
+    />
 
-      {/* zzz de soneca */}
-      <text x="82" y="40" className="fill-neutral-500" fontSize="11" fontFamily="inherit">
-        z
-      </text>
-      <text x="90" y="30" className="fill-neutral-600" fontSize="8" fontFamily="inherit">
-        z
-      </text>
-      <text x="96" y="22" className="fill-neutral-700" fontSize="6" fontFamily="inherit">
-        z
-      </text>
-    </svg>
+    <path
+      d="M30 62c6-4 14-6 20-6"
+      className="stroke-neutral-600"
+      strokeWidth="1.2"
+      strokeLinecap="round"
+    />
+
+    <circle
+      cx="52"
+      cy="62"
+      r="5"
+      className="fill-orange-500/15 stroke-orange-400"
+      strokeWidth="1.5"
+    />
+
+    <path
+      d="M46 47c1-6 6-9 11-9-2 4-3 8-2 11Z"
+      className="fill-white/[0.05] stroke-neutral-500"
+      strokeWidth="1.5"
+      strokeLinejoin="round"
+    />
+
+    <path
+      d="M46 77c1 6 6 9 11 9-2-4-3-8-2-11Z"
+      className="fill-white/[0.05] stroke-neutral-500"
+      strokeWidth="1.5"
+      strokeLinejoin="round"
+    />
+
+    <path
+      d="M22 55c-5 2-7 4-7 8s2 6 7 8"
+      className="fill-white/[0.05] stroke-neutral-500"
+      strokeWidth="1.5"
+      strokeLinejoin="round"
+    />
+
+    <text
+      x="82"
+      y="40"
+      className="fill-neutral-500"
+      fontSize="11"
+      fontFamily="inherit"
+    >
+      z
+    </text>
+
+    <text
+      x="90"
+      y="30"
+      className="fill-neutral-600"
+      fontSize="8"
+      fontFamily="inherit"
+    >
+      z
+    </text>
+
+    <text
+      x="96"
+      y="22"
+      className="fill-neutral-700"
+      fontSize="6"
+      fontFamily="inherit"
+    >
+      z
+    </text>
+  </svg>
   );
 }
 

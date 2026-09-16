@@ -6,17 +6,25 @@ import { useEffect, useRef, useState } from "react";
 // aparece na tela — nunca entram no bundle JS nem pesam nas páginas que não usam TikZ.
 let tikzJaxPromise: Promise<void> | null = null;
 
+// Os rótulos de texto de QUALQUER figura em TikZ (compilada ao vivo ou a partir do SVG
+// cacheado, ver TikzStatic) usam caracteres de área de uso privado que só têm glifo nessas
+// fontes Computer Modern — sem o link carregado, o texto fica invisível (só as formas
+// geométricas aparecem). Por isso essa função é chamada nos dois caminhos, não só aqui.
+export function ensureTikzFontsLoaded() {
+  if (!document.querySelector('link[data-tikzjax-fonts]')) {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = "/tikzjax/fonts.css";
+    link.setAttribute("data-tikzjax-fonts", "true");
+    document.head.appendChild(link);
+  }
+}
+
 function loadTikzJax(): Promise<void> {
   if (tikzJaxPromise) return tikzJaxPromise;
 
   tikzJaxPromise = new Promise((resolve, reject) => {
-    if (!document.querySelector('link[data-tikzjax-fonts]')) {
-      const link = document.createElement("link");
-      link.rel = "stylesheet";
-      link.href = "/tikzjax/fonts.css";
-      link.setAttribute("data-tikzjax-fonts", "true");
-      document.head.appendChild(link);
-    }
+    ensureTikzFontsLoaded();
 
     const script = document.createElement("script");
     script.src = "/tikzjax/tikzjax.js";

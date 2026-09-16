@@ -1,4 +1,5 @@
-import { TikzFigure } from "./TikzFigure";
+import { useEffect } from "react";
+import { TikzFigure, ensureTikzFontsLoaded } from "./TikzFigure";
 
 // A maioria das questões já carrega o SVG compilado uma vez (no momento em que o
 // professor salvou a figura, via TikzFigure + onRendered no QuestionFormModal), então
@@ -14,6 +15,10 @@ export function TikzStatic({
   source: string;
   className?: string;
 }) {
+  useEffect(() => {
+    if (svg) ensureTikzFontsLoaded();
+  }, [svg]);
+
   if (svg) {
     return (
       <div

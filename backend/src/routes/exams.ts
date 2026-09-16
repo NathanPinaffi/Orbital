@@ -3,9 +3,42 @@ import { z } from "zod";
 import { prisma } from "../lib/prisma.js";
 import { requireAuth, type AuthedRequest } from "../lib/authMiddleware.js";
 import { shuffle } from "../lib/shuffle.js";
+import { classroomForRequest } from "../lib/google.js";
 
 export const examsRouter = Router();
 examsRouter.use(requireAuth);
+
+/**
+ * Marca a entrega como "turned in" no Google Sala de Aula. Sem isso, o professor via
+ * o próprio Classroom nunca sabe que o aluno terminou a prova — a Orbital calculava a
+ * nota internamente, mas a atividade continuava marcada como "0 entregues" pro professor.
+ * Não bloqueia o envio da prova se o Classroom estiver indisponível ou desconectado.
+ */
+async function turnInToClassroom(
+  req: AuthedRequest,
+  assessment: { googleCourseWorkId: string | null; class: { googleClassroomId: string | null } },
+) {
+  if (!assessment.googleCourseWorkId || !assessment.class.googleClassroomId) return;
+  try {
+    const { classroom } = await classroomForRequest(req);
+    const { data } = await classroom.courses.courseWork.studentSubmissions.list({
+      courseId: assessment.class.googleClassroomId,
+      courseWorkId: assessment.googleCourseWorkId,
+      userId: "me",
+    });
+    const studentSubmission = data.studentSubmissions?.[0];
+    if (!studentSubmission?.id) return;
+    if (studentSubmission.state === "TURNED_IN" || studentSubmission.state === "RETURNED") return;
+
+    await classroom.courses.courseWork.studentSubmissions.turnIn({
+      courseId: assessment.class.googleClassroomId,
+      courseWorkId: assessment.googleCourseWorkId,
+      id: studentSubmission.id,
+    });
+  } catch (err) {
+    console.error("[classroom] falha ao marcar entrega como enviada", err);
+  }
+}
 
 async function loadAssessmentForStudent(assessmentId: string, studentId: string) {
   const assessment = await prisma.assessment.findUnique({
@@ -219,6 +252,8 @@ examsRouter.post("/:assessmentId/submit", async (req: AuthedRequest, res, next) 
         data: { submittedAt: new Date(), score },
       });
     });
+
+    await turnInToClassroom(req, assessment);
 
     res.json({ status: "submitted", score });
   } catch (err) {

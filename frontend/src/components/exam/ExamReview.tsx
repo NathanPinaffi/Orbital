@@ -10,7 +10,9 @@ const TYPE_LABEL: Record<ExamReviewQuestion["type"], string> = {
   ESSAY: "Dissertativa",
 };
 
-export function ExamReview({ questions }: { questions: ExamReviewQuestion[] }) {
+export function ExamReview({ questions }: { questions: ExamReviewQuestion[] | undefined }) {
+  if (!questions || questions.length === 0) return null;
+
   return (
     <div className="overflow-hidden rounded-[28px] border border-white/10 bg-[#0A0A0A] text-left">
       {questions.map((q, i) => {

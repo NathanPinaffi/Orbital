@@ -393,7 +393,7 @@ export type ExamState =
       secondsUntilBreak: number | null;
       breakDurationSeconds: number | null;
     }
-  | { status: "submitted"; score: number | null; questions: ExamReviewQuestion[] };
+  | { status: "submitted"; score: number | null; questions?: ExamReviewQuestion[] };
 
 export function fetchExam(assessmentId: string): Promise<ExamState> {
   return authFetch(`/exams/${assessmentId}`);

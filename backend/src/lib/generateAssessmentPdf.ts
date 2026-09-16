@@ -1,5 +1,6 @@
 import PDFDocument from "pdfkit";
 import SVGtoPDF from "svg-to-pdfkit";
+import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { drawRichText } from "./richText.js";
@@ -7,6 +8,11 @@ import { drawRichText } from "./richText.js";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const LOGO_PATH = path.join(__dirname, "..", "..", "assets", "logo-black.png");
 const LOGO_ASPECT_RATIO = 300 / 933;
+
+/** Fontes do TikZJax (Computer Modern), convertidas de .woff2 para .ttf — o PDFKit
+ *  (via fontkit 2.0.4) não consegue subsetar/embutir .woff2 corretamente: os glifos saem
+ *  em branco mesmo com a fonte registrada com sucesso, mas .ttf funciona sem problema. */
+const TIKZ_FONTS_DIR = path.join(__dirname, "..", "..", "assets", "tikz-fonts");
 
 const LETTERS = ["A", "B", "C", "D", "E", "F", "G", "H"];
 const MARGIN = 56;
@@ -169,6 +175,26 @@ function extractSvgSize(svg: string): { width: number; height: number } | null {
 }
 
 /**
+ * Registra no doc, sob demanda, as fontes Computer Modern usadas pelos rótulos de texto
+ * do SVG (ex.: font-family="cmr10"). Sem isso os rótulos saem em branco no PDF — as formas
+ * geométricas (linhas, setas, preenchimentos) não dependem de fonte e sempre funcionam.
+ */
+function registerTikzFonts(doc: PDFKit.PDFDocument, svg: string) {
+  const families = new Set([...svg.matchAll(/font-family="([^"]+)"/g)].map((m) => m[1]));
+  for (const family of families) {
+    // _registeredFonts existe em runtime (o próprio svg-to-pdfkit depende dele) mas não está
+    // nos tipos do pdfkit.
+    if ((doc as unknown as { _registeredFonts?: Record<string, unknown> })._registeredFonts?.[family]) continue;
+    const fontPath = path.join(TIKZ_FONTS_DIR, `${family}.ttf`);
+    try {
+      if (fs.existsSync(fontPath)) doc.registerFont(family, fontPath);
+    } catch {
+      // Fonte ausente ou corrompida: o rótulo correspondente simplesmente não aparece.
+    }
+  }
+}
+
+/**
  * Desenha uma figura TikZ já compilada (SVG cacheado, ver Question.tikzSvg), centralizada
  * e reduzida para caber na largura útil da página. Se o SVG não tiver um viewport legível
  * ou não couber no restante da página atual, pula para uma nova página antes de desenhar.
@@ -177,6 +203,8 @@ function extractSvgSize(svg: string): { width: number; height: number } | null {
 function drawTikzFigure(doc: PDFKit.PDFDocument, svg: string, x: number, y: number, maxWidth: number): number {
   const size = extractSvgSize(svg);
   if (!size) return y;
+
+  registerTikzFonts(doc, svg);
 
   const cap = Math.min(maxWidth, 260);
   const scale = Math.min(1, cap / size.width);

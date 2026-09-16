@@ -89,7 +89,55 @@ examsRouter.get("/:assessmentId", async (req: AuthedRequest, res, next) => {
     }
 
     if (submission.submittedAt) {
-      return res.json({ status: "submitted", score: submission.score });
+      const [assessmentQuestions, answers] = await Promise.all([
+        prisma.assessmentQuestion.findMany({
+          where: { assessmentId: assessment.id },
+          include: { question: { include: { alternatives: true } } },
+          orderBy: { order: "asc" },
+        }),
+        prisma.answer.findMany({ where: { submissionId: submission.id } }),
+      ]);
+      const answerByQuestionId = new Map(answers.map((a) => [a.questionId, a]));
+
+      const questions = assessmentQuestions.map((aq) => {
+        const answer = answerByQuestionId.get(aq.questionId);
+        return {
+          id: aq.question.id,
+          content: aq.question.content,
+          type: aq.question.type,
+          maxPoints: aq.points,
+          alternatives: aq.question.alternatives.map((alt) => ({
+            id: alt.id,
+            content: alt.content,
+            isCorrect: alt.isCorrect,
+          })),
+          requiresSketch: aq.question.requiresSketch,
+          tikz: aq.question.tikz,
+          tikzSvg: aq.question.tikzSvg,
+          graph:
+            aq.question.graphExpression != null
+              ? {
+                  expression: aq.question.graphExpression,
+                  xMin: aq.question.graphXMin!,
+                  xMax: aq.question.graphXMax!,
+                  yMin: aq.question.graphYMin!,
+                  yMax: aq.question.graphYMax!,
+                }
+              : null,
+          answer: answer
+            ? {
+                response: answer.response,
+                sketchData: answer.sketchData ? JSON.parse(answer.sketchData) : null,
+                isCorrect: answer.isCorrect,
+                points: answer.points,
+                teacherComment: answer.teacherComment,
+                gradedAt: answer.gradedAt,
+              }
+            : null,
+        };
+      });
+
+      return res.json({ status: "submitted", score: submission.score, questions });
     }
 
     const elapsedSeconds = (Date.now() - submission.startedAt.getTime()) / 1000;

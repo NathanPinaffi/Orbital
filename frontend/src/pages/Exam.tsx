@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { ExamShell } from "../components/exam/ExamShell";
 import { ExamWarning } from "../components/exam/ExamWarning";
 import { ExamRunner } from "../components/exam/ExamRunner";
+import { ExamReview } from "../components/exam/ExamReview";
 import { HappyPlanet } from "../components/exam/HappyPlanet";
 import { ApiError, fetchExam, startExam, submitExam, type ExamState, type Stroke } from "../lib/api";
 
@@ -50,7 +51,7 @@ export default function Exam() {
         })),
       );
       setFinalScore(result.score);
-      setState({ status: "submitted", score: result.score });
+      load();
     } catch {
       setError("Não foi possível enviar a prova. Tente novamente.");
     }
@@ -95,19 +96,23 @@ export default function Exam() {
       )}
 
       {!error && state?.status === "submitted" && (
-        <div className="rounded-[28px] border border-white/10 bg-[#0A0A0A] p-10 text-center">
-          <HappyPlanet className="mx-auto mb-4 h-28 w-28" />
-          <h1 className="font-bricolage mb-2 text-2xl font-light tracking-tight text-white">Prova enviada!</h1>
-          {(finalScore ?? state.score) != null ? (
-            <p className="text-sm text-neutral-400">
-              Nota: <span className="text-white">{(finalScore ?? state.score)!.toFixed(1)}</span> / 10
-            </p>
-          ) : (
-          <>
-            <p className="text-sm text-neutral-800">Boa sorte!</p>
-            <p className="text-sm text-neutral-400">Sua prova será corrigida em breve.</p>
-          </>
-        )}
+        <div className="space-y-4">
+          <div className="rounded-[28px] border border-white/10 bg-[#0A0A0A] p-10 text-center">
+            <HappyPlanet className="mx-auto mb-4 h-28 w-28" />
+            <h1 className="font-bricolage mb-2 text-2xl font-light tracking-tight text-white">Prova enviada!</h1>
+            {(finalScore ?? state.score) != null ? (
+              <p className="text-sm text-neutral-400">
+                Nota: <span className="text-white">{(finalScore ?? state.score)!.toFixed(1)}</span> / 10
+              </p>
+            ) : (
+              <>
+                <p className="text-sm text-neutral-800">Boa sorte!</p>
+                <p className="text-sm text-neutral-400">Sua prova será corrigida em breve.</p>
+              </>
+            )}
+          </div>
+
+          <ExamReview questions={state.questions} />
         </div>
       )}
     </ExamShell>

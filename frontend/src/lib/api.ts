@@ -360,6 +360,28 @@ export interface ExamQuestion {
   tikzSvg: string | null;
 }
 
+export interface ExamReviewAnswer {
+  response: string;
+  sketchData: Stroke[] | null;
+  isCorrect: boolean | null;
+  points: number | null;
+  teacherComment: string | null;
+  gradedAt: string | null;
+}
+
+export interface ExamReviewQuestion {
+  id: string;
+  content: string;
+  type: QuestionType;
+  maxPoints: number;
+  alternatives: GradingAlternative[];
+  requiresSketch: boolean;
+  tikz: string | null;
+  tikzSvg: string | null;
+  graph: QuestionGraph | null;
+  answer: ExamReviewAnswer | null;
+}
+
 export type ExamState =
   | { status: "not_started"; title: string; durationMinutes: number; questionCount: number }
   | {
@@ -371,7 +393,7 @@ export type ExamState =
       secondsUntilBreak: number | null;
       breakDurationSeconds: number | null;
     }
-  | { status: "submitted"; score: number | null };
+  | { status: "submitted"; score: number | null; questions: ExamReviewQuestion[] };
 
 export function fetchExam(assessmentId: string): Promise<ExamState> {
   return authFetch(`/exams/${assessmentId}`);

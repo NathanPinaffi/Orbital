@@ -157,6 +157,20 @@ assessmentsRouter.get("/:assessmentId/pdf", async (req: AuthedRequest, res, next
       ? `Data de entrega: ${assessment.dueAt.toLocaleDateString("pt-BR", { timeZone: "UTC" })}`
       : `Gerado em: ${new Date().toLocaleDateString("pt-BR")}`;
 
+    // eslint-disable-next-line no-console -- diagnóstico temporário para o bug de figuras TikZ sumindo do PDF
+    for (const aq of assessmentQuestions) {
+      console.log(
+        "[tikz-debug]",
+        JSON.stringify({
+          questionId: aq.question.id,
+          hasTikz: Boolean(aq.question.tikz),
+          tikzLength: aq.question.tikz?.length ?? 0,
+          hasTikzSvg: Boolean(aq.question.tikzSvg),
+          tikzSvgLength: aq.question.tikzSvg?.length ?? 0,
+        }),
+      );
+    }
+
     const doc = generateAssessmentPdf({
       title: assessment.title,
       teacherName: teacher?.name ?? "",

@@ -200,10 +200,16 @@ export function ExamRunner({
               <div className="space-y-3">
                 <textarea
                   className="min-h-32 w-full resize-y rounded-lg border border-white/10 bg-[#050505] px-3 py-2 text-sm text-white placeholder:text-neutral-600 focus:border-orange-500/50 focus:outline-none"
-                  placeholder="Digite sua resposta..."
+                  placeholder="Digite sua resposta... (use $x^2$ para fórmulas em LaTeX)"
                   value={answers[q.id] ?? ""}
                   onChange={(e) => setAnswer(q.id, e.target.value)}
                 />
+                {(answers[q.id] ?? "").includes("$") && (
+                  <div className="rounded-lg border border-white/10 bg-white/[0.02] px-3 py-2">
+                    <p className="mb-1 text-[10px] uppercase text-neutral-500">Pré-visualização</p>
+                    <MathText text={answers[q.id] ?? ""} className="whitespace-pre-wrap text-sm text-neutral-200" />
+                  </div>
+                )}
                 {q.requiresSketch && (
                   <div>
                     <p className="mb-1.5 text-xs text-neutral-400">Esboce o gráfico da sua resposta</p>

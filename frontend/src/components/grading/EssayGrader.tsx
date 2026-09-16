@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { SketchPad } from "../common/SketchPad";
+import { MathText } from "../common/MathText";
 import type { GradingQuestion } from "../../lib/api";
 
 export function EssayGrader({
@@ -34,7 +35,11 @@ export function EssayGrader({
   return (
     <div className="space-y-3">
       <div className="rounded-lg bg-white/[0.02] px-3 py-2 text-sm text-neutral-300 ring-1 ring-white/5">
-        {answer?.response || <span className="text-neutral-600">Sem resposta</span>}
+        {answer?.response ? (
+          <MathText text={answer.response} className="whitespace-pre-wrap" />
+        ) : (
+          <span className="text-neutral-600">Sem resposta</span>
+        )}
       </div>
 
       {question.requiresSketch && (
